@@ -1,5 +1,5 @@
 import { registerUser } from "../../API/userApi";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";

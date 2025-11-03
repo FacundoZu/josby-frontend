@@ -1,7 +1,7 @@
 import { login } from "../../API/authApi";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 
 const Login = () => {
