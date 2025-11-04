@@ -1,6 +1,6 @@
 import api from "../libs/axios";
 
-export const registerUser = async (userData) => {
+export async function registerUser(userData) {
   try {
     const url = `/user/register`
     const response = await api.post(url, userData);
