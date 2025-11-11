@@ -1,5 +1,6 @@
 import { FaFacebookF, FaInstagram, FaXTwitter } from "react-icons/fa6";
 import josbyLogo from "../assets/imgs/josby-logo.png";
+import { Link } from "react-router";
 
 const Footer = () => {
   return (
@@ -11,24 +12,25 @@ const Footer = () => {
           </div>
 
             <div className="flex flex-col gap-3 text-center md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
-            <a
-              href="#"
+            <Link
+              to="/"
               className="text-text-secondary-light hover:text-white transition-colors"
             >
               Servicios
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/"
               className="text-text-secondary-light hover:text-white transition-colors"
             >
               Freelancers
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/"
               className="text-text-secondary-light hover:text-white transition-colors"
             >
               Ofrecer servicio
-            </a>
+            </Link>
+            
           </div>
 
           <div>
