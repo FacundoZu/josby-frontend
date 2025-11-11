@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="bg-text-primary py-6">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="relative flex flex-col md:flex-row justify-between items-center md:items-center gap-10">
+        <div className="relative flex flex-col md:flex-row justify-between items-center md:items-center gap-10 pt-2">
           <div>
             <img src={josbyLogo} alt="Logo de Josby" className="w-52" />
           </div>
