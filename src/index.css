@@ -5,7 +5,8 @@
     --color-primary: #38ced6;
     --color-secondary: #5834b7;
     --color-text-primary: #011314;
-    --color-text-secondary: #718096;
+    --color-text-secondary-light: #d4d4d4;
+    --color-text-secondary-dark: #718096;
     --color-hover-morado: #6a44c9;
     --color-hover-cyan: #2aa8b0;
 }
