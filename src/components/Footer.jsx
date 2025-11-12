@@ -1,6 +1,6 @@
-import { FaFacebookF, FaInstagram, FaXTwitter } from "react-icons/fa6";
-import josbyLogo from "../assets/imgs/josby-logo.png";
-import { Link } from "react-router";
+import { FaFacebookF, FaInstagram, FaXTwitter } from "react-icons/fa6"
+import josbyLogo from "../assets/imgs/josby-logo.png"
+import { Link } from "react-router"
 
 const Footer = () => {
   return (
