@@ -1,0 +1,57 @@
+[
+    {
+            "title": "Diseño de Logos",
+            "category": "Diseño Gráfico",
+            "image": "/services/disenio-grafico.webp",
+            "userAvatar": "/user-image.webp",
+            "userName": "Maria Gonzáles",
+            "location": "Madrid, España",
+            "description": "Creo logos únicos y memorables para tu marca. Incluye 3 conceptos iniciales y revisiones...",
+            "price": 23,
+            "delivery": "3 días"
+    },
+    {
+            "title": "Redacción de artículos",
+            "category": "Redacción",
+            "image": "/services/disenio-grafico.webp",
+            "userAvatar": "/user-image.webp",
+            "userName": "Marina Duarte",
+            "location": "Madrid, España",
+            "description": "Artículos profesionales con investigación, SEO y estilo claro.",
+            "price": 25,
+            "delivery": "2 días"
+    },
+    {
+            "title": "Fotografía de productos",
+            "category": "Fotografía",
+            "image": "/services/disenio-grafico.webp",
+            "userAvatar": "/user-image.webp",
+            "userName": "Diego Aguilar",
+            "location": "Buenos Aires, Argentina",
+            "description": "Fotografía profesional para ecommerce con edición incluida.",
+            "price": 60,
+            "delivery": "4 días"
+    },
+    {
+            "title": "Animaciones 2D",
+            "category": "Animación",
+            "image": "/services/disenio-grafico.webp",
+            "userAvatar": "/user-image.webp",
+            "userName": "Emilia Navarro",
+            "location": "Lima, Perú",
+            "description": "Animaciones cortas explicativas o promocionales en estilo 2D.",
+            "price": 70,
+            "delivery": "5 días"
+    },
+    {
+            "title": "Desarrollo de app móvil",
+            "category": "Apps Móviles",
+            "image": "/services/disenio-grafico.webp",
+            "userAvatar": "/user-image.webp",
+            "userName": "Fernando Ruiz",
+            "location": "Ciudad de México, México",
+            "description": "Aplicaciones híbridas para iOS y Android con diseño moderno.",
+            "price": 250,
+            "delivery": "10 días"
+    }
+]
