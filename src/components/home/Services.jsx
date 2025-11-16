@@ -1,5 +1,5 @@
 import ServiceCard from "./ServiceCard";
-import services from "../../../public/data/services.json";
+import services from "../../data/services.json";
 
 const Services = () => {
 
