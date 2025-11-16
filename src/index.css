@@ -17,3 +17,17 @@
     --color-hover-cyan: #2aa8b0;
 }
 
+.dropdown {
+    animation: slideDown 0.3s ease-in-out alternate;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

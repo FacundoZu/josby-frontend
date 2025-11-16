@@ -209,7 +209,7 @@ const Header = () => {
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-200">
+                <div className="absolute dropdown right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-200" onMouseLeave={() => setIsDropdownOpen(false)}>
                   <ul className="py-1">
                     <li>
                       <NavLink
