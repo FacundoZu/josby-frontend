@@ -17,6 +17,18 @@
     --color-hover-cyan: #2aa8b0;
 }
 
+.contact-button{
+    @apply bg-primary-dark hover:bg-primary-dark/80 text-white px-4 py-2 rounded-lg transition cursor-pointer;
+}
+
+.sub-title{
+    @apply text-2xl font-semibold text-text-primary mb-6;
+}
+
+.filter-input{
+    @apply border border-text-secondary-dark rounded-lg outline-none py-2 px-4 shadow;
+}
+
 .dropdown {
     animation: slideDown 0.3s ease-in-out alternate;
 }
