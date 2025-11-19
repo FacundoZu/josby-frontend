@@ -1,0 +1,152 @@
+[
+  {
+    "firstname": "María",
+    "lastname": "González",
+    "email": "maria.gonzalez@example.com",
+    "image": "/user-image.webp",
+    "title": "Diseñadora Gráfica Especialista en Branding",
+    "location": "Madrid, España",
+    "description": "Diseñadora gráfica con más de 8 años de experiencia creando identidades visuales memorables para startups y negocios en crecimiento.",
+    "skills": ["Adobe Illustrator", "Photoshop", "Branding", "Identidad Visual"]
+  },
+  {
+    "firstname": "Carlos",
+    "lastname": "Pérez",
+    "email": "carlos.perez@example.com",
+    "image": "/user-image.webp",
+    "title": "Full Stack Developer MERN",
+    "location": "Buenos Aires, Argentina",
+    "description": "Desarrollador full stack experto en aplicaciones web modernas usando React, Node y MongoDB.",
+    "skills": ["React", "Node.js", "MongoDB", "Express"]
+  },
+  {
+    "firstname": "Ana",
+    "lastname": "Martínez",
+    "email": "ana.martinez@example.com",
+    "image": "/user-image.webp",
+    "title": "Especialista en Marketing Digital",
+    "location": "Santiago, Chile",
+    "description": "Gestiono estrategias de marketing digital para empresas que desean aumentar su presencia online.",
+    "skills": ["Meta Ads", "Google Ads", "Copywriting", "SEO"]
+  },
+  {
+    "firstname": "Lucas",
+    "lastname": "Fernández",
+    "email": "lucas.fernandez@example.com",
+    "image": "/user-image.webp",
+    "title": "Desarrollador Frontend React",
+    "location": "Montevideo, Uruguay",
+    "description": "Programador frontend enfocado en experiencias de usuario rápidas, accesibles y modernas.",
+    "skills": ["React", "TailwindCSS", "Redux", "Next.js"]
+  },
+  {
+    "firstname": "Sofía",
+    "lastname": "Ramos",
+    "email": "sofia.ramos@example.com",
+    "image": "/user-image.webp",
+    "title": "UX/UI Designer",
+    "location": "Bogotá, Colombia",
+    "description": "Diseñadora UX/UI con enfoque en interfaces limpias, funcionales y centradas en el usuario.",
+    "skills": ["Figma", "Prototyping", "Wireframing", "Design Systems"]
+  },
+  {
+    "firstname": "Gabriel",
+    "lastname": "Silva",
+    "email": "gabriel.silva@example.com",
+    "image": "/user-image.webp",
+    "title": "Backend Developer",
+    "location": "São Paulo, Brasil",
+    "description": "Especialista en desarrollo backend con enfoque en seguridad, escalabilidad y APIs limpias.",
+    "skills": ["Node.js", "PostgreSQL", "Docker", "REST APIs"]
+  },
+  {
+    "firstname": "Julia",
+    "lastname": "Navarro",
+    "email": "julia.navarro@example.com",
+    "image": "/user-image.webp",
+    "title": "Community Manager",
+    "location": "Lima, Perú",
+    "description": "Gestiono redes sociales para marcas que desean conectar con su comunidad y aumentar su engagement.",
+    "skills": ["Social Media", "Content Strategy", "Copywriting"]
+  },
+  {
+    "firstname": "Daniel",
+    "lastname": "Ortiz",
+    "email": "daniel.ortiz@example.com",
+    "image": "/user-image.webp",
+    "title": "Data Analyst",
+    "location": "Ciudad de México, México",
+    "description": "Analista de datos especializado en visualización, dashboards y análisis estadístico.",
+    "skills": ["Python", "Power BI", "SQL", "Pandas"]
+  },
+  {
+    "firstname": "Elena",
+    "lastname": "Costa",
+    "email": "elena.costa@example.com",
+    "image": "/user-image.webp",
+    "title": "Redactora Creativa",
+    "location": "Barcelona, España",
+    "description": "Redactora profesional con experiencia en storytelling, guiones y contenido creativo.",
+    "skills": ["Copywriting", "Storytelling", "SEO Writing"]
+  },
+  {
+    "firstname": "Tomás",
+    "lastname": "Vega",
+    "email": "tomas.vega@example.com",
+    "image": "/user-image.webp",
+    "title": "Mobile Developer",
+    "location": "Quito, Ecuador",
+    "description": "Desarrollador móvil especializado en Android e iOS utilizando React Native.",
+    "skills": ["React Native", "JavaScript", "Expo", "Firebase"]
+  },
+  {
+    "firstname": "Isabella",
+    "lastname": "Morales",
+    "email": "isabella.morales@example.com",
+    "image": "/user-image.webp",
+    "title": "Ilustradora Digital",
+    "location": "Caracas, Venezuela",
+    "description": "Artista digital enfocada en ilustración para marcas, libros y contenido audiovisual.",
+    "skills": ["Procreate", "Illustration", "Character Design"]
+  },
+  {
+    "firstname": "Hugo",
+    "lastname": "Serrano",
+    "email": "hugo.serrano@example.com",
+    "image": "/user-image.webp",
+    "title": "Cybersecurity Specialist",
+    "location": "Buenos Aires, Argentina",
+    "description": "Consultor en ciberseguridad con enfoque en auditorías, pentesting y protección de datos.",
+    "skills": ["Pentesting", "Linux", "Firewalls", "OWASP"]
+  },
+  {
+    "firstname": "Camila",
+    "lastname": "Torres",
+    "email": "camila.torres@example.com",
+    "image": "/user-image.webp",
+    "title": "Videógrafa y Editora",
+    "location": "Santiago, Chile",
+    "description": "Especialista en grabación y edición de contenido audiovisual profesional.",
+    "skills": ["Premiere Pro", "After Effects", "Color Grading"]
+  },
+  {
+    "firstname": "Mateo",
+    "lastname": "Reyes",
+    "email": "mateo.reyes@example.com",
+    "image": "/user-image.webp",
+    "title": "Software Engineer",
+    "location": "Miami, Estados Unidos",
+    "description": "Ingeniero de software enfocado en arquitectura, APIs escalables y microservicios.",
+    "skills": ["Go", "Kubernetes", "Microservices", "Cloud"]
+  },
+  {
+    "firstname": "Valentina",
+    "lastname": "Paz",
+    "email": "valentina.paz@example.com",
+    "image": "/user-image.webp",
+    "title": "Fotógrafa Profesional",
+    "location": "Rosario, Argentina",
+    "description": "Fotógrafa especializada en retratos, fotografía de producto y eventos.",
+    "skills": ["Lightroom", "Photography", "Photoshop"]
+  }
+]
