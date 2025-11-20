@@ -73,7 +73,9 @@ const Header = () => {
     <header className="p-4 bg-[#f6fdfe]">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         <div>
-          <img src={josbyLogo} alt="Logo de Josby" className="w-48" />
+          <NavLink to="/">
+            <img src={josbyLogo} alt="Logo de Josby" className="w-48" />
+          </NavLink>
         </div>
 
         <div className="relative md:hidden">
@@ -114,7 +116,7 @@ const Header = () => {
                 </NavLink>
                 <NavLink
                   onClick={() => setIsMenuOpen(false)}
-                  to="/"
+                  to="/freelancers"
                   className="hover:text-hover-cyan transition-colors"
                 >
                   Freelancers
@@ -181,7 +183,7 @@ const Header = () => {
           <NavLink to="/" className="hover:text-hover-cyan transition-colors">
             Servicios
           </NavLink>
-          <NavLink to="/" className="hover:text-hover-cyan transition-colors">
+          <NavLink to="/freelancers" className="hover:text-hover-cyan transition-colors">
             Freelancers
           </NavLink>
           <NavLink to="/" className="hover:text-hover-cyan transition-colors">

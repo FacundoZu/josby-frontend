@@ -10,7 +10,7 @@ const Categories = () => {
 
     return (
         <section className="max-w-7xl mx-auto mt-16 px-4">
-            <h2 className="text-2xl font-semibold text-text-primary mb-6">
+            <h2 className="sub-title">
                 Categorías Populares
             </h2>
 

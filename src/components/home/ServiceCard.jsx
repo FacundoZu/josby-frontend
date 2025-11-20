@@ -43,7 +43,7 @@ const ServiceCard = ({ service }) => {
             <p className="text-xs text-text-secondary">Entrega en {service.delivery}</p>
           </div>
 
-          <button className="bg-primary-dark hover:bg-primary-dark/80 text-white text-sm px-4 py-2 rounded-full transition cursor-pointer">
+          <button className="contact-button">
             Contactar
           </button>
         </div>
