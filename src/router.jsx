@@ -5,6 +5,7 @@ import Login from "./views/auth/Login";
 import Register from "./views/auth/Register";
 import { ToastContainer } from "react-toastify";
 import Freelancers from "./views/freelancers/Freelancers";
+import Service from "./views/service/Service";
 
 export default function router() {
     return (
@@ -13,6 +14,8 @@ export default function router() {
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Home />} />
                     <Route path="/freelancers" element={<Freelancers />} />
+                    <Route path="/service/:id" element={<Service />} />
+
                 </Route>
 
                 <Route path="/login" element={<Login />} />
