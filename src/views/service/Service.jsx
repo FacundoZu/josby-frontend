@@ -7,6 +7,7 @@ import Badge from "../../components/service/Badge"
 import PricingCard from "../../components/service/PricingCard"
 import FreelancerProfile from "../../components/service/FreelancerProfile"
 import ReactMarkdown from 'react-markdown';
+import ClientChat from "../../components/chat/ClientChat"
 
 const serviceData = {
   title: "Diseño de Logo Profesional",
@@ -133,9 +134,7 @@ const Service = () => {
       </div>
 
       {/* Botón de chat */}
-      <button className="fixed bottom-6 right-6 bg-secondary hover:bg-hover-morado text-white p-4 rounded-full shadow-lg transition-transform hover:scale-110 z-50 cursor-pointer">
-        <LuMessageCircle size={24} />
-      </button>
+      <ClientChat freelancer={serviceData.freelancer}/>
     </div>
   )
 }
