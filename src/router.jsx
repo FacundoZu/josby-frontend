@@ -6,6 +6,7 @@ import Register from "./views/auth/Register";
 import { ToastContainer } from "react-toastify";
 import Freelancers from "./views/freelancers/Freelancers";
 import Service from "./views/service/Service";
+import ChatFreelancer from "./views/chat/ChatFreelancer";
 
 export default function router() {
     return (
@@ -15,6 +16,7 @@ export default function router() {
                     <Route index element={<Home />} />
                     <Route path="/freelancers" element={<Freelancers />} />
                     <Route path="/service/:id" element={<Service />} />
+                    <Route path="/chat" element={<ChatFreelancer />} />
 
                 </Route>
 

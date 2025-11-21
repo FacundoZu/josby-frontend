@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { MdKeyboardArrowLeft } from "react-icons/md"
 import { LuClock2 } from "react-icons/lu"
-import { LuMessageCircle } from "react-icons/lu"
 import Gallery from "../../components/service/Gallery"
 import Badge from "../../components/service/Badge"
 import PricingCard from "../../components/service/PricingCard"
