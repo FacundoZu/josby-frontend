@@ -43,7 +43,7 @@ const ChatFreelancer = () => {
     <div className="flex flex-col md:flex-row h-[calc(100vh-120px)] my-2 mx-2 bg-white rounded-lg shadow-sm overflow-hidden border border-text-secondary-light">
       
       {/* Lista de chats*/}
-      <div className={`w-full md:w-1/3 lg:w-1/4 border-r border-gray-100 flex flex-col ${mobileMenuOpen ? 'block' : 'hidden md:flex'}`}>
+      <div className={`w-full md:w-1/3 lg:w-1/4 border-r border-gray-100 flex flex-col ${selectedChatId ? 'hidden md:flex' : 'flex h-full'}`}>
         
         <div className="p-4 border-b border-gray-100 bg-gray-50">
           <h2 className="font-bold text-lg text-text-primary mb-3">Mensajes</h2>
@@ -66,7 +66,7 @@ const ChatFreelancer = () => {
                 setSelectedChatId(chat.id)
                 setMobileMenuOpen(false)
               }}
-              className={`p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-50 ${selectedChatId === chat.id ? 'bg-blue-50/50 border-l-4 border-l-primary' : ''}`}
+              className={`p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-50 ${selectedChatId === chat.id ? 'bg-blue-50/50 border-l-4 border-l-primary' : 'border-l-4 border-l-transparent'}`}
             >
               <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold shrink-0">
                 {chat.avatar}
@@ -93,14 +93,14 @@ const ChatFreelancer = () => {
       </div>
 
       {/* Area del chat abierto */}
-      <div className={`flex-1 flex flex-col ${!mobileMenuOpen ? 'flex' : 'hidden md:flex'}`}>
+      <div className={`flex-1 flex flex-col ${!selectedChatId ? 'hidden md:flex' : 'flex'}`}>
         {activeChat ? (
           <>
             
             <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white h-[73px]">
                <div className="flex items-center gap-3">
                  
-                 <button className="md:hidden text-gray-500" onClick={() => setMobileMenuOpen(true)}>
+                 <button className="md:hidden text-gray-500" onClick={() => setSelectedChatId(null)}>
                    <MdKeyboardArrowLeft />
                  </button>
                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
