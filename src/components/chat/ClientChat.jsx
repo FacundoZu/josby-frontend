@@ -3,29 +3,110 @@ import { LuMessageCircle } from "react-icons/lu"
 import { MdClose } from "react-icons/md"
 import BubbleMessage from './BubbleMessage'
 import ChatInput from './ChatInput'
+import { useAuth } from '../../hooks/useAuth'
+import { socket } from '../../libs/socket'
+import { getConversationByParticipants, sendMessage } from '../../API/chatApi'
 
 
 const ClientChat = ({ freelancer }) => {
+  const { data: authData } = useAuth()
+  const currentUser = authData?.user || authData
+  const currentUserId = currentUser?.id || currentUser?._id
+
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState([
-    { id: 1, text: `Hola, ¿En qué puedo ayudarte?`, sender: "other", time: "10:30" }
-  ])
+  const [messages, setMessages] = useState([])
+  const [conversationId, setConversationId] = useState(null)
+  const [loading, setLoading] = useState(false)
   
   const messagesEndRef = useRef(null)
+
+  useEffect(() => {
+    if (isOpen && freelancer?._id && currentUserId) {
+      const loadConversation = async () => {
+        setLoading(true);
+        try {
+          const data = await getConversationByParticipants(freelancer._id)
+
+          if (data) {
+            setConversationId(data._id)
+            setMessages(data.messages || [])
+            socket.emit("join_chat", data._id)
+          } else {
+            setMessages([]);
+            setConversationId(null)
+          }
+
+        } catch (error) {
+          console.error("Error cargando historial:", error)
+
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      loadConversation()
+    }
+  }, [isOpen, freelancer, currentUserId])
+
+  useEffect(() => {
+    const handleReceiveMessage = (incomingMessage) => {
+      // Solo agregamos si pertenece a la conversación activa
+      if (conversationId && incomingMessage.conversationId === conversationId) {
+         setMessages((prev) => [...prev, incomingMessage])
+      }
+    }
+
+    socket.on("receive_message", handleReceiveMessage)
+
+    return () => {
+      socket.off("receive_message", handleReceiveMessage)
+    }
+
+  }, [conversationId])
 
   // Auto-scroll para los mensajes
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, isOpen])
 
-  const handleSendMessage = (text) => {
-    const newMessage = { 
-        id: Date.now(), 
-        text, sender: "me", 
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-    }
+  const handleSendMessage = async (text) => {
+    try {
+      const newMessage = { 
+        freelancerId: freelancer._id,
+        clientId: currentUserId,
+        message: text,
+        from: currentUserId,
+        createdAt: new Date().toISOString()
+      }
 
-    setMessages(prev => [...prev, newMessage])
+      const response = await sendMessage(newMessage)
+
+      if (!conversationId) {
+        // CASO: Conversación Nueva
+        setConversationId(response._id)
+        socket.emit("join_chat", response._id)
+        
+        setMessages(response.messages || [newMessage]) 
+      } else {
+        // CASO: Conversación Existente
+        setMessages(prev => [...(prev || []), newMessage])
+      }
+
+    } catch (error) {
+      console.error("Error al enviar el mensaje", error)
+    }
+  }
+
+  const formatMessageForUI = (msg) => {
+    const isMe = msg.from === currentUserId
+    return {
+        id: msg._id || Date.now() + Math.random(), 
+        text: msg.message,
+        isMe: isMe,
+        time: msg.createdAt 
+            ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    }
   }
 
   return (
@@ -61,14 +142,26 @@ const ClientChat = ({ freelancer }) => {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 bg-gray-50 scrollbar-thin">
-            {messages.map((msg) => (
-              <BubbleMessage 
-                key={msg.id} 
-                text={msg.text} 
-                isMe={msg.sender === "me"} 
-                time={msg.time} />
-            ))}
-            <div ref={messagesEndRef} />
+            {loading ? (
+                <div className="flex flex-col justify-center items-center h-full text-gray-400 text-sm animate-pulse">
+                    <p>Cargando chat...</p>
+                </div>
+            ) : messages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 px-6">
+                    <p className="text-sm font-medium text-gray-500">¡Comienza el proyecto!</p>
+                    <p className="text-xs mt-1">Envía un mensaje a {freelancer?.firstname} para empezar.</p>
+                </div>
+            ) : (
+                <div className="flex flex-col space-y-2">
+                    {messages.map((msg) => {
+                        const uiMsg = formatMessageForUI(msg);
+                        return (
+                            <BubbleMessage key={uiMsg.id} text={uiMsg.text} isMe={uiMsg.isMe} time={uiMsg.time} />
+                        )
+                    })}
+                    <div ref={messagesEndRef} />
+                </div>
+            )}
           </div>
 
           <ChatInput onSend={handleSendMessage} />

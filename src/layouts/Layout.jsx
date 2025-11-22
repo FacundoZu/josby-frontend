@@ -12,7 +12,6 @@ export default function Layout() {
     if (isLoading) return
 
     if (user) {
-      console.log(user)
       if (!socket.connected) {
         socket.connect()
         socket.emit("setup", user.user.id)
