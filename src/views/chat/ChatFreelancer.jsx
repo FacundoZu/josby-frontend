@@ -35,7 +35,6 @@ const MOCK_CHATS = [
 
 const ChatFreelancer = () => {
   const [selectedChatId, setSelectedChatId] = useState()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const activeChat = MOCK_CHATS.find(c => c.id === selectedChatId)
 
@@ -64,7 +63,6 @@ const ChatFreelancer = () => {
               key={chat.id}
               onClick={() => {
                 setSelectedChatId(chat.id)
-                setMobileMenuOpen(false)
               }}
               className={`p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-50 ${selectedChatId === chat.id ? 'bg-blue-50/50 border-l-4 border-l-primary' : 'border-l-4 border-l-transparent'}`}
             >

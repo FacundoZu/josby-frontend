@@ -12,12 +12,16 @@ import { getServiceById } from "../../API/service/serviceApi"
 import Spinner from "../../components/Spinner"
 import { LuSearchX } from "react-icons/lu"
 import { Link, useParams } from "react-router"
+import { useAuth } from "../../hooks/useAuth"
 
 const Service = () => {
+  const { data } = useAuth()
   const { id } = useParams()
   const [service, setService] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('description') // description | freelancer
+
+  const isFreelancer = data?.user?.role === "freelancer"
 
   useEffect(() => {
     async function getService(){
@@ -144,8 +148,10 @@ const Service = () => {
         </div>
       </div>
 
-      {/* Botón de chat */}
-      <ClientChat freelancer={service.usuarioId}/>
+      {/* Botón de chat (solo visible para clientes) */}
+      {!isFreelancer && (
+        <ClientChat freelancer={service.usuarioId}/>
+      )}
     </div>
   )
 }
