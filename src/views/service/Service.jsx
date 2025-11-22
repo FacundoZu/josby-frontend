@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
 import { MdKeyboardArrowLeft } from "react-icons/md"
 import { LuClock2 } from "react-icons/lu"
 import Gallery from "../../components/service/Gallery"
@@ -7,60 +8,37 @@ import PricingCard from "../../components/service/PricingCard"
 import FreelancerProfile from "../../components/service/FreelancerProfile"
 import ReactMarkdown from 'react-markdown';
 import ClientChat from "../../components/chat/ClientChat"
-
-const serviceData = {
-  title: "Diseño de Logo Profesional",
-  deliveryTime: "3 días",
-  tags: ["Logo", "Branding", "Identidad Visual", "Diseño Gráfico"],
-  price: 100,
-  features: [
-    "3 conceptos de logo",
-    "Revisiones ilimitadas",
-    "Todos los formatos (PNG, JPG, SVG, PDF)",
-    "Guía de marca básica",
-    "Versiones en color y B&N"
-  ],
-  images: [
-    "https://venngage-wordpress.s3.amazonaws.com/uploads/2021/12/section-3-logos.png",
-    "https://static-cse.canva.com/blob/1112244/logo.jpg",
-    "https://img.freepik.com/vector-gratis/plantilla-diseno-logotipo-monograma-ap-diseno-plano_23-2150155857.jpg?t=st=1763593985~exp=1763597585~hmac=7fa660c167ed322793ae9c3a75bcf3772209becda51f5e425306f423d7566e12",
-    "https://fiverr-res.cloudinary.com/images/q_auto,f_auto/gigs/125595779/original/6c5bcaa59692ab691312b869a92a0aa3e5faab0b/design-professional-business-logo.jpg",
-  ],
-  freelancer: {
-    firstname: "María",
-    lastname: "González",
-    title: "Diseñadora Gráfica Profesional",
-    location: "Madrid, España",
-    bio: "Diseñadora gráfica apasionada con más de 8 años de experiencia en branding y diseño de identidad visual. He trabajado con startups, pequeñas empresas y grandes corporaciones, siempre entregando resultados que superan las expectativas.",
-  },
-  description: `¿Necesitas un logo que represente perfectamente tu marca?
-  
-  Soy María González, diseñadora gráfica con más de 8 años de experiencia creando identidades visuales para empresas de todos los tamaños. Mi especialidad es crear logos que no solo se ven increíbles, sino que también comunican efectivamente los valores de tu marca.
-  
-  **¿Qué incluye este servicio?**
-  3 conceptos de logo únicos y originales
-  Revisiones ilimitadas hasta tu satisfacción total
-  Archivos en alta resolución (PNG, JPG, SVG, PDF)
-  Guía de uso del logo con colores y tipografías
-  Versiones en color, blanco y negro
-  Entrega en 3 días laborables
-  
-  **Mi proceso de trabajo:**
-  **Briefing inicial:** Conversamos sobre tu marca, valores y preferencias.
-  **Investigación:** Analizo tu industria y competencia.
-  **Conceptualización:** Creo 3 propuestas únicas.
-  **Refinamiento:** Trabajamos juntos en las revisiones.
-  **Entrega final:** Recibes todos los archivos y documentación.
-  
-  **¿Por qué elegirme?**
-   Más de 500 logos creados
-   100% de clientes satisfechos
-   Respuesta en menos de 1 hora
-   Garantía de satisfacción total`
-}
+import { getServiceById } from "../../API/service/serviceApi"
 
 const Service = () => {
+  const [service, setService] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('description') // description | freelancer
+
+  useEffect(() => {
+    async function getService(){
+      try {
+        const data = await getServiceById("6921c1a5a2940041df04e489")
+        setService(data)
+
+      } catch (error) {
+        console.error("Error cargando servicio", error)
+        toast.error("Error al cargar el servicio")
+
+      } finally {
+        setLoading(false)
+      }
+    }
+    getService()
+  },[])
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Cargando servicio...</div>
+  }
+
+  if (!service) {
+    return <div>No se encontró el servicio.</div>
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20 font-sans text-text-primary">
@@ -78,19 +56,19 @@ const Service = () => {
         <div className="lg:col-span-2 space-y-8">
           
           
-          <Gallery images={serviceData.images} />
+          <Gallery images={service.images} />
 
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-text-primary mb-2">
-              {serviceData.title}
+              {service.title}
             </h1>
             <div className="flex items-center gap-2 text-sm text-text-secondary-dark mb-4">
               <LuClock2 size={16} />
-              <span>Entrega en {serviceData.deliveryTime}</span>
+              <span>Entrega en {service.deliveryTime} días</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {serviceData.tags.map((tag) => (
-                <Badge key={tag} text={tag} />
+              {service.categories.map((c) => (
+                <Badge key={c._id} text={c.name} />
               ))}
             </div>
           </div>
@@ -116,11 +94,11 @@ const Service = () => {
             {activeTab === 'description' ? (
               <div className="prose prose-slate max-w-none text-text-secondary-dark whitespace-pre-line">
                <ReactMarkdown>
-                    {serviceData.description}
+                    {service.description}
                 </ReactMarkdown>
               </div>
             ) : (
-              <FreelancerProfile freelancer={serviceData.freelancer} />
+              <FreelancerProfile freelancer={service.usuarioId} />
             )}
           </div>
           
@@ -128,12 +106,12 @@ const Service = () => {
 
         {/* COLUMNA DERECHA*/}
         <div className="lg:col-span-1">
-            <PricingCard price={serviceData.price} features={serviceData.features} />
+            <PricingCard price={service.price} features={service.features} deliveryTime={service.deliveryTime} title={service.title} />
         </div>
       </div>
 
       {/* Botón de chat */}
-      <ClientChat freelancer={serviceData.freelancer}/>
+      <ClientChat freelancer={service.usuarioId}/>
     </div>
   )
 }

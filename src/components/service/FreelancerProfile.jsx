@@ -17,7 +17,7 @@ const FreelancerProfile = ({ freelancer }) => {
         </div>
       </div>
       <p className="text-text-secondary-dark text-sm leading-relaxed border-t border-gray-100 pt-4">
-        {freelancer.bio}
+        {freelancer.description}
       </p>
     </div>
   )
