@@ -7,7 +7,7 @@ import { logoutUser } from "../API/authApi";
 import { toast } from "react-toastify";
 import josbyLogo from "../assets/imgs/josby-logo.png";
 import { FaUser, FaRegUser } from "react-icons/fa";
-import { MdLogout } from "react-icons/md";
+import { MdLogout, MdInbox } from "react-icons/md";
 import { IoMenu } from "react-icons/io5";
 import { MdClose } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
@@ -21,6 +21,8 @@ const Header = () => {
 
   const dropdownRef = useRef(null);
   const menuRef = useRef(null);
+
+  const isFreelancer = data?.user?.role === "freelancer";
 
   const { mutate } = useMutation({
     mutationFn: logoutUser,
@@ -69,6 +71,7 @@ const Header = () => {
 
   // if (isLoading) return null
 
+  //Todo: Agregas las rutas correctas de los NavLinks
   return (
     <header className="p-4 bg-[#f6fdfe]">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
@@ -121,25 +124,46 @@ const Header = () => {
                 >
                   Freelancers
                 </NavLink>
-                <NavLink
-                  onClick={() => setIsMenuOpen(false)}
-                  to="/"
-                  className="hover:text-hover-cyan transition-colors"
-                >
-                  Ofrecer servicio
-                </NavLink>
+
+                {isFreelancer ? (
+                  <NavLink
+                    onClick={() => setIsMenuOpen(false)}
+                    to="/" 
+                    className="hover:text-hover-cyan transition-colors"
+                  >
+                    Mis pedidos
+                  </NavLink>
+                ) : (
+                  <NavLink
+                    onClick={() => setIsMenuOpen(false)}
+                    to="/" 
+                    className="hover:text-hover-cyan transition-colors"
+                  >
+                    Ofrecer servicio
+                  </NavLink>
+                )}
               </nav>
             </div>
             <div className="px-4 py-4">
               {data ? (
                 <div className="flex flex-col gap-3">
-                  <NavLink
-                    onClick={() => setIsMenuOpen(false)}
-                    to="/"
-                    className="bg-primary hover:bg-hover-cyan text-white border border-gray-200 px-4 py-2 rounded-md"
-                  >
-                    Mis pedidos
-                  </NavLink>
+                  {isFreelancer ? (
+                    <NavLink
+                      onClick={() => setIsMenuOpen(false)}
+                      to="/chat" 
+                      className="flex items-center gap-2 bg-white border border-gray-300 text-text-primary hover:bg-gray-100 px-4 py-2 rounded-md"
+                    >
+                      <MdInbox className="text-xl" /> Mensajes
+                    </NavLink>
+                  ) : (
+                    <NavLink
+                      onClick={() => setIsMenuOpen(false)}
+                      to="/"
+                      className="bg-primary hover:bg-hover-cyan text-white border border-gray-200 px-4 py-2 rounded-md"
+                    >
+                      Mis pedidos
+                    </NavLink>
+                  )}
                   <NavLink
                     onClick={() => setIsMenuOpen(false)}
                     to="/profile"
@@ -179,26 +203,50 @@ const Header = () => {
           </div>
         </div>
 
-        <nav className="hidden md:flex gap-8 text-sm font-medium text-text-primary">
+        <nav className="hidden md:flex gap-8 text-sm font-medium text-text-primary items-center">
           <NavLink to="/" className="hover:text-hover-cyan transition-colors">
             Servicios
           </NavLink>
-          <NavLink to="/freelancers" className="hover:text-hover-cyan transition-colors">
+          <NavLink
+            to="/freelancers"
+            className="hover:text-hover-cyan transition-colors"
+          >
             Freelancers
           </NavLink>
-          <NavLink to="/" className="hover:text-hover-cyan transition-colors">
-            Ofrecer servicio
-          </NavLink>
-        </nav>
 
-        {data ? (
-          <nav className="hidden md:flex gap-4">
+          {isFreelancer ? (
             <NavLink
-              to=""
+              to="/"
               className="bg-primary hover:bg-hover-cyan text-white border border-gray-200 px-4 py-2 rounded-md"
             >
               Mis pedidos
             </NavLink>
+          ) : (
+            <NavLink to="/" className="hover:text-hover-cyan transition-colors">
+              Ofrecer servicio
+            </NavLink>
+          )}
+        </nav>
+
+        {data ? (
+          <nav className="hidden md:flex gap-4 items-center">
+            {isFreelancer ? (
+              <NavLink
+                to="/chat" 
+                className="p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-full transition-all"
+                title="Inbox"
+              >
+                <MdInbox className="text-3xl" />
+              </NavLink>
+            ) : (
+              <NavLink
+                to="/"
+                className="bg-primary hover:bg-hover-cyan text-white border border-gray-200 px-4 py-2 rounded-md"
+              >
+                Mis pedidos
+              </NavLink>
+            )}
+
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
@@ -211,7 +259,10 @@ const Header = () => {
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute dropdown right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-200" onMouseLeave={() => setIsDropdownOpen(false)}>
+                <div
+                  className="absolute dropdown right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-200"
+                  onMouseLeave={() => setIsDropdownOpen(false)}
+                >
                   <ul className="py-1">
                     <li>
                       <NavLink
