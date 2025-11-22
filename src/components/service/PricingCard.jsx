@@ -26,7 +26,7 @@ const PricingCard = ({ price, features, deliveryTime, title }) => {
       </ul>
 
       <button className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-lg transition-colors shadow-md hover:shadow-lg cursor-pointer">
-        Continuar
+        Contratar
       </button>
       <p className="text-center text-xs text-text-secondary-light mt-3">Pago 100% seguro</p>
     </div>

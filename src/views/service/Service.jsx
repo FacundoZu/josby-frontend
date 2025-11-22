@@ -9,8 +9,12 @@ import FreelancerProfile from "../../components/service/FreelancerProfile"
 import ReactMarkdown from 'react-markdown';
 import ClientChat from "../../components/chat/ClientChat"
 import { getServiceById } from "../../API/service/serviceApi"
+import Spinner from "../../components/Spinner"
+import { LuSearchX } from "react-icons/lu"
+import { Link, useParams } from "react-router"
 
 const Service = () => {
+  const { id } = useParams()
   const [service, setService] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('description') // description | freelancer
@@ -18,26 +22,54 @@ const Service = () => {
   useEffect(() => {
     async function getService(){
       try {
-        const data = await getServiceById("6921c1a5a2940041df04e489")
-        setService(data)
+        if(id){
+          // const data = await getServiceById(id)
+          const data = await getServiceById("6921cbf4b391f426bcd87156")
+          setService(data)
+        }
 
       } catch (error) {
         console.error("Error cargando servicio", error)
-        toast.error("Error al cargar el servicio")
+        toast.error("Error al cargar el servicio", error)
 
       } finally {
         setLoading(false)
       }
     }
     getService()
-  },[])
+  },[id])
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Cargando servicio...</div>
+    return <Spinner />
   }
 
   if (!service) {
-    return <div>No se encontró el servicio.</div>
+    return (
+      <div className="flex h-[calc(100vh-340px)] items-center justify-center px-4 text-center">
+        <div className="max-w-md space-y-6">
+
+          <div className="mx-auto bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center">
+            <LuSearchX className="w-10 h-10 text-gray-400" />
+          </div>
+          
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-text-primary">
+              Servicio no encontrado
+            </h2>
+            <p className="text-text-secondary-dark">
+              Parece que el servicio que buscas ha sido eliminado o el enlace es incorrecto.
+            </p>
+          </div>
+
+          <Link 
+            to="/" 
+            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors shadow-sm w-full sm:w-auto"
+          >
+            Volver a explorar
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -46,7 +78,9 @@ const Service = () => {
       <nav className="border-b border-gray-100 py-4 px-4 md:px-8 mb-8">
         <div className="max-w-7xl mx-auto flex items-center gap-2 text-sm text-text-secondary-dark cursor-pointer hover:text-primary transition-colors">
           <MdKeyboardArrowLeft size={16} />
-          <span>Volver a servicios</span>
+          <Link to="/">
+            <span>Volver a servicios</span>
+          </Link>
         </div>
       </nav>
 

@@ -1,4 +1,5 @@
 import { GrLocation } from "react-icons/gr";
+import { Link } from "react-router";
 
 const ServiceCard = ({ service }) => {
   return (
@@ -44,7 +45,9 @@ const ServiceCard = ({ service }) => {
           </div>
 
           <button className="contact-button">
-            Contactar
+            <Link to={`/service/${service._id}`}>
+              Contactar
+            </Link>
           </button>
         </div>
       </div>
