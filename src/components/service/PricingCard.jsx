@@ -3,8 +3,6 @@ import { FaCheck } from "react-icons/fa6"
 
 const PricingCard = ({ price, features, deliveryTime, title }) => {
 
-  const featuresArray = features.split(".")
-  
   return (
     <div className="sticky top-8 border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
       <div className="mb-4">
@@ -19,7 +17,7 @@ const PricingCard = ({ price, features, deliveryTime, title }) => {
       </div>
 
       <ul className="space-y-3 mb-8">
-        {featuresArray.map((feature, idx) => (
+        {features.map((feature, idx) => (
           <li key={idx} className="flex items-start gap-3 text-sm text-text-secondary-dark">
             <FaCheck size={16} className="text-primary shrink-0 mt-0.5" />
             <span>{feature}</span>
