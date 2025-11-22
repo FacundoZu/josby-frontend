@@ -149,7 +149,7 @@ const Service = () => {
       </div>
 
       {/* Botón de chat (solo visible para clientes) */}
-      {!isFreelancer && (
+      {data && !isFreelancer  && (
         <ClientChat freelancer={service.usuarioId}/>
       )}
     </div>
