@@ -1,8 +1,30 @@
 import { Outlet } from "react-router";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { socket } from "../libs/socket.js"; 
+import { useAuth } from "../hooks/useAuth.js";
+import { useEffect } from "react";
 
 export default function Layout() {
+  const { data: user, isLoading } = useAuth()
+
+  useEffect(() => {
+    if (isLoading) return
+
+    if (user) {
+      console.log(user)
+      if (!socket.connected) {
+        socket.connect()
+        socket.emit("setup", user.user.id)
+      }
+    } else {
+      if (socket.connected) {
+        socket.disconnect()
+      }
+    }
+    
+  }, [user, isLoading])
+  
   return (
     <>
       <Header />
