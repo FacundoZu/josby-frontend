@@ -19,11 +19,19 @@ const ChatFreelancer = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(true)
 
-  const messagesEndRef = useRef(null)
+  const chatContainerRef = useRef(null)
 
   // Auto-scroll
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    if (chatContainerRef.current) {
+      const { scrollHeight, clientHeight } = chatContainerRef.current;
+      
+      
+      chatContainerRef.current.scrollTo({
+        top: scrollHeight - clientHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [activeChat?.messages])
 
 
@@ -214,7 +222,9 @@ const ChatFreelancer = () => {
             </div>
 
             
-            <div className="flex-1 overflow-y-auto p-6 bg-gray-50 space-y-4">
+            <div 
+              ref={chatContainerRef}
+              className="flex-1 overflow-y-auto p-6 bg-gray-50 space-y-4">
               {activeChat.messages && activeChat.messages.length > 0 ? (
                   activeChat.messages.map((msg) => {
                     return (
