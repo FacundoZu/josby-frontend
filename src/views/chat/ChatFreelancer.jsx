@@ -6,8 +6,9 @@ import { GoSearch } from "react-icons/go"
 import { MdKeyboardArrowLeft, MdClose } from "react-icons/md"
 import { useAuth } from '../../hooks/useAuth'
 import { socket } from '../../libs/socket'
-import { getConversations, getConversationById, sendMessage, searchConversations } from '../../API/chatApi'
+import { getConversations, getConversationById, sendMessage, searchConversations, markAsRead } from '../../API/chatApi'
 import { toast } from 'react-toastify'
+import UnreadBadge from '../../components/chat/UnreadBadge'
 
 const ChatFreelancer = () => {
   const { data: authData } = useAuth()
@@ -20,6 +21,7 @@ const ChatFreelancer = () => {
   const [loading, setLoading] = useState(true)
 
   const chatContainerRef = useRef(null)
+  const sidebarProcessedIds = useRef(new Set())
 
   // Auto-scroll
   useEffect(() => {
@@ -42,6 +44,7 @@ const ChatFreelancer = () => {
       // Asignar el último mensaje a lastMessage para el sidebar
       const conversationsWithLast = (data || []).map(conv => ({
         ...conv,
+        unread: conv.unread || 0,
         lastMessage: conv.messages && conv.messages.length > 0 ? conv.messages[conv.messages.length - 1].message : ''
       }))
       setConversations(conversationsWithLast)
@@ -63,6 +66,23 @@ const ChatFreelancer = () => {
   useEffect(() => {
     fetchConversations()
   }, [])
+
+  const handleSelectChat = async (chatId) => {
+      setSelectedChatId(chatId)
+
+      if (chatId) {
+          
+        setConversations(prev => prev.map(c => 
+          c._id === chatId ? { ...c, unread: 0 } : c
+        ))
+          
+        try {
+          await markAsRead(chatId)
+        } catch (error) {
+            console.error("Error al marcar mensajes como leido", error);
+        }
+      }
+  }
 
   useEffect(() => {
     if (selectedChatId) {
@@ -92,6 +112,7 @@ const ChatFreelancer = () => {
           
           const formattedResults = (results || []).map(conv => ({
              ...conv,
+             unread: conv.unread || 0,
              lastMessage: conv.messages && conv.messages.length > 0 ? conv.messages[conv.messages.length - 1].message : ''
           }))
 
@@ -120,7 +141,7 @@ const ChatFreelancer = () => {
         })
       }
 
-      updateSidebar(incomingMessage);
+      updateSidebar(incomingMessage)
     }
 
 
@@ -129,22 +150,33 @@ const ChatFreelancer = () => {
     }
 
     const updateSidebar = (incomingMessage) => {
+        if (sidebarProcessedIds.current.has(incomingMessage.newMessage?._id)) {
+          return
+        }
+        
+        sidebarProcessedIds.current.add(incomingMessage.newMessage?._id)
+
         setConversations(prev => {
-            const chatIndex = prev.findIndex(c => String(c._id) === String(incomingMessage.conversationId))
+          const chatIndex = prev.findIndex(c => String(c._id) === String(incomingMessage.conversationId))
             
-            if (chatIndex === -1) {
-                if(searchTerm === "") fetchConversations() 
-                return prev
-            }
+          if (chatIndex === -1) {
+            if(searchTerm === "") fetchConversations() 
+            return prev
+          }
+
+          const isChatOpen = selectedChatId === incomingMessage.conversationId
+          const currentUnread = prev[chatIndex].unread || 0
+          const newUnread = isChatOpen ? 0 : currentUnread + 1
     
-            const updatedChat = {
-              ...prev[chatIndex],
-              lastMessage: incomingMessage.newMessage.message,
-              updatedAt: new Date().toISOString()
-            }
+          const updatedChat = {
+            ...prev[chatIndex],
+            lastMessage: incomingMessage.newMessage.message,
+            updatedAt: new Date().toISOString(),
+            unread: newUnread
+          }
     
-            return [updatedChat, ...prev.filter((_, i) => i !== chatIndex)]
-          })
+          return [updatedChat, ...prev.filter((_, i) => i !== chatIndex)]
+        })
     }
 
 
@@ -180,7 +212,8 @@ const ChatFreelancer = () => {
          const updatedChat = {
            ...prev[chatIndex],
            lastMessage: text,
-           updatedAt: new Date().toISOString()
+           updatedAt: new Date().toISOString(),
+           unread: 0
          }
          return [updatedChat, ...prev.filter((_, i) => i !== chatIndex)]
       })
@@ -229,15 +262,13 @@ const ChatFreelancer = () => {
             conversations.map((chat) => (
               <div 
                 key={chat._id}
-                onClick={() => {
-                  setSelectedChatId(chat._id)
-                }}
+                onClick={() => handleSelectChat(chat._id)}
                 className={`p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-50 ${selectedChatId === chat._id ? 'bg-blue-50/50 border-l-4 border-l-primary' : 'border-l-4 border-l-transparent'}`}
               >
                 <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold shrink-0">
                   {chat.clientId.firstname.charAt(0).toUpperCase()}{chat.clientId.lastname.charAt(0).toUpperCase()}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 relative">
                   <div className="flex justify-between items-baseline mb-1">
                     <h3 className={`text-sm truncate ${chat.unread > 0 ? 'font-bold text-text-primary' : 'font-medium text-text-secondary-primary'}`}>
                       {chat.clientId.firstname} {chat.clientId.lastname}
@@ -246,6 +277,11 @@ const ChatFreelancer = () => {
                   </div>
                   <p className={`text-xs truncate ${chat.unread > 0 ? 'font-semibold text-text-primary' : 'text-text-secondary-dark'}`}>
                     {chat.lastMessage}
+                    <div className="absolute top-5 -right-1 z-50">
+                      {chat.unread > 0 && (
+                          <UnreadBadge count={chat.unread} />
+                      )}
+                    </div>
                   </p>
                 </div>
               </div>
