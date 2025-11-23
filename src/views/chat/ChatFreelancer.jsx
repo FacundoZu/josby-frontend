@@ -3,7 +3,7 @@ import BubbleMessage from '../../components/chat/BubbleMessage'
 import ChatInput from '../../components/chat/ChatInput'
 import { LuMessageCircle } from "react-icons/lu"
 import { GoSearch } from "react-icons/go"
-import { MdKeyboardArrowLeft } from "react-icons/md"
+import { MdKeyboardArrowLeft, MdClose } from "react-icons/md"
 import { useAuth } from '../../hooks/useAuth'
 import { socket } from '../../libs/socket'
 import { getConversations, getConversationById, sendMessage, searchConversations } from '../../API/chatApi'
@@ -222,7 +222,9 @@ const ChatFreelancer = () => {
           {loading ? (
             <div className="p-4 text-center text-gray-400 text-sm">Cargando chats...</div>
           ) : conversations.length === 0 ? (
-             <div className="p-4 text-center text-gray-400 text-sm">No tienes mensajes aún.</div>
+             <div className="p-4 text-center text-gray-400 text-sm">
+                {searchTerm ? "No se encontraron resultados." : "No tienes mensajes aún."}
+             </div>
           ) : (
             conversations.map((chat) => (
               <div 
@@ -270,6 +272,12 @@ const ChatFreelancer = () => {
                     <h3 className="font-bold text-text-primary">{activeChat.clientId.firstname} {activeChat.clientId.lastname}</h3>
                   </div>
                </div>
+               <button 
+                  onClick={() => setSelectedChatId(null)}
+                  className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+               >
+                  <MdClose size={24} />
+               </button>
             </div>
 
             
