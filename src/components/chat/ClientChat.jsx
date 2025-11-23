@@ -50,9 +50,8 @@ const ClientChat = ({ freelancer }) => {
 
   useEffect(() => {
     const handleReceiveMessage = (incomingMessage) => {
-      // Solo agregamos si pertenece a la conversación activa
       if (conversationId && incomingMessage.conversationId === conversationId) {
-         setMessages((prev) => [...prev, incomingMessage.newMessage])
+          setMessages((prev) => [...prev, incomingMessage.newMessage])
       }
     }
 
@@ -61,7 +60,6 @@ const ClientChat = ({ freelancer }) => {
     return () => {
       socket.off("receive_message", handleReceiveMessage)
     }
-
   }, [conversationId])
 
   // Auto-scroll para los mensajes

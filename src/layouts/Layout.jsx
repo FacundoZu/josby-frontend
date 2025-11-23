@@ -14,6 +14,10 @@ export default function Layout() {
     if (user) {
       if (!socket.connected) {
         socket.connect()
+        const userId = user.user.id || user.user._id;
+      
+        socket.emit("join_chat", userId)
+
         socket.emit("setup", user.user.id)
       }
     } else {

@@ -38,8 +38,25 @@ const ChatFreelancer = () => {
   const fetchConversations = async () => {
     try {
       const data = await getConversations()
-      setConversations(data || [])
-      console.log(data)
+
+      // Asignar el último mensaje a lastMessage para el sidebar
+      const conversationsWithLast = (data || []).map(conv => ({
+        ...conv,
+        lastMessage: conv.messages && conv.messages.length > 0 ? conv.messages[conv.messages.length - 1].message : ''
+      }))
+      setConversations(conversationsWithLast)
+
+      // Unirse a todas las salas de las conversaciones
+      if (Array.isArray(data)) {
+        data.forEach(conv => {
+          if (conv._id) socket.emit("join_chat", conv._id)
+        })
+      }
+
+      if (currentUserId) {
+          socket.emit("join_chat", currentUserId); 
+      }
+
     } catch (error) {
       console.error("Error cargando las conversaciones:", error)
     } finally {
@@ -70,8 +87,7 @@ const ChatFreelancer = () => {
 
   useEffect(() => {
     const handleReceiveMessage = (incomingMessage) => {
-      // Si el mensaje es del chat que tengo abierto, lo agrego a la vista
-      console.log(incomingMessage)
+      
       if (selectedChatId && incomingMessage.conversationId === selectedChatId) {
         setActiveChat(prev => {
           if (!prev) return prev
@@ -82,30 +98,41 @@ const ChatFreelancer = () => {
         })
       }
 
-      // Actualizar la lista lateral
-      setConversations(prev => {
-        const chatIndex = prev.findIndex(c => c._id === incomingMessage.conversationId)
-        
-        if (chatIndex === -1) {
-            fetchConversations() 
-            return prev
-        }
-
-        const updatedChat = {
-          ...prev[chatIndex],
-          lastMessage: incomingMessage.newMessage.message,
-          updatedAt: new Date().toISOString(),
-        }
-
-        // Mover al principio del array
-        const newConversations = [updatedChat, ...prev.filter((_, i) => i !== chatIndex)]
-        return newConversations
-      })
+      updateSidebar(incomingMessage);
     }
 
-    socket.on("receive_message", handleReceiveMessage)
+
+    const handleListUpdate = (incomingMessage) => {
+      updateSidebar(incomingMessage)
+    }
+
+    const updateSidebar = (incomingMessage) => {
+        setConversations(prev => {
+            const chatIndex = prev.findIndex(c => String(c._id) === String(incomingMessage.conversationId))
+            
+            if (chatIndex === -1) {
+                fetchConversations() 
+                return prev
+            }
     
-    return () => socket.off("receive_message", handleReceiveMessage)
+            const updatedChat = {
+              ...prev[chatIndex],
+              lastMessage: incomingMessage.newMessage.message,
+              updatedAt: new Date().toISOString()
+            }
+    
+            return [updatedChat, ...prev.filter((_, i) => i !== chatIndex)]
+          })
+    }
+
+
+    socket.on("receive_message", handleReceiveMessage)
+    socket.on("chat_list_update", handleListUpdate) 
+    
+    return () => {
+        socket.off("receive_message", handleReceiveMessage)
+        socket.off("chat_list_update", handleListUpdate)
+    }
   }, [selectedChatId])
 
   const handleSendMessage = async (text) => {
