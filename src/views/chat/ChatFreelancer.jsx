@@ -53,10 +53,6 @@ const ChatFreelancer = () => {
         })
       }
 
-      if (currentUserId) {
-          socket.emit("join_chat", currentUserId); 
-      }
-
     } catch (error) {
       console.error("Error cargando las conversaciones:", error)
     } finally {
@@ -86,8 +82,34 @@ const ChatFreelancer = () => {
   }, [selectedChatId])
 
   useEffect(() => {
-    const handleReceiveMessage = (incomingMessage) => {
+    const delayDebounceFn = setTimeout(async () => {
       
+      if (searchTerm.trim() === "") {
+        fetchConversations()
+      } else {
+        try {
+          const results = await searchConversations(searchTerm)
+          
+          const formattedResults = (results || []).map(conv => ({
+             ...conv,
+             lastMessage: conv.messages && conv.messages.length > 0 ? conv.messages[conv.messages.length - 1].message : ''
+          }))
+
+          setConversations(formattedResults)
+        } catch (error) {
+          console.error("Error en la búsqueda:", error)
+          toast.error("Error al buscar conversaciones")
+        }
+      }
+    }, 500) 
+
+    return () => clearTimeout(delayDebounceFn)
+
+  }, [searchTerm])
+
+  useEffect(() => {
+    const handleReceiveMessage = (incomingMessage) => {
+
       if (selectedChatId && incomingMessage.conversationId === selectedChatId) {
         setActiveChat(prev => {
           if (!prev) return prev
@@ -111,7 +133,7 @@ const ChatFreelancer = () => {
             const chatIndex = prev.findIndex(c => String(c._id) === String(incomingMessage.conversationId))
             
             if (chatIndex === -1) {
-                fetchConversations() 
+                if(searchTerm === "") fetchConversations() 
                 return prev
             }
     
@@ -133,7 +155,7 @@ const ChatFreelancer = () => {
         socket.off("receive_message", handleReceiveMessage)
         socket.off("chat_list_update", handleListUpdate)
     }
-  }, [selectedChatId])
+  }, [selectedChatId, searchTerm])
 
   const handleSendMessage = async (text) => {
     if (!activeChat) return
@@ -187,6 +209,8 @@ const ChatFreelancer = () => {
             <GoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
             <input 
               type="text" 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar cliente..." 
               className="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-primary"
             />
