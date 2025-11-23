@@ -52,7 +52,7 @@ const ClientChat = ({ freelancer }) => {
     const handleReceiveMessage = (incomingMessage) => {
       // Solo agregamos si pertenece a la conversación activa
       if (conversationId && incomingMessage.conversationId === conversationId) {
-         setMessages((prev) => [...prev, incomingMessage])
+         setMessages((prev) => [...prev, incomingMessage.newMessage])
       }
     }
 
@@ -86,11 +86,8 @@ const ClientChat = ({ freelancer }) => {
         setConversationId(response._id)
         socket.emit("join_chat", response._id)
         
-        setMessages(response.messages || [newMessage]) 
-      } else {
-        // CASO: Conversación Existente
-        setMessages(prev => [...(prev || []), newMessage])
-      }
+        setMessages(response.messages || []) 
+      } 
 
     } catch (error) {
       console.error("Error al enviar el mensaje", error)
@@ -103,9 +100,9 @@ const ClientChat = ({ freelancer }) => {
         id: msg._id || Date.now() + Math.random(), 
         text: msg.message,
         isMe: isMe,
-        time: msg.createdAt 
-            ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: msg.date 
+            ? new Date(msg.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+            : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
     }
   }
 
