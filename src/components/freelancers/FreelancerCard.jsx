@@ -4,11 +4,17 @@ export default function FreelancerCard({ data }) {
     return (
         <div className="flex flex-col justify-between bg-white p-4 rounded-2xl shadow-md border border-gray-100">
             <div className="flex items-center gap-4">
-                <img
-                    src={data.image || "user-image.webp"}
-                    alt={data.firstname}
-                    className="w-14 h-14 rounded-full object-cover"
-                />
+                {data.image ? (
+                    <img
+                        src={data.image}
+                        alt={data.firstname}
+                        className="w-14 h-14 rounded-full object-cover"
+                    />
+                ): (
+                    <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                        {data.firstname.charAt(0).toUpperCase()}{data.lastname.charAt(0).toUpperCase()}
+                    </div>
+                )}
 
                 <div>
                     <h2 className="text-lg font-semibold">{data.firstname} {data.lastname}</h2>
@@ -28,7 +34,7 @@ export default function FreelancerCard({ data }) {
                 {data.skills.map((skill, index) => (
                     <span
                         key={index}
-                        className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs"
+                        className="bg-hover-morado text-white px-3 py-1 rounded-full text-xs"
                     >
                         {skill.name}
                     </span>
