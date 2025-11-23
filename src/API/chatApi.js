@@ -57,3 +57,14 @@ export const sendMessage = async (data) => {
         }
     }
 }
+
+export const markAsRead = async (chatId) => {
+    try {
+        const response = await api.put(`/chat/read/${chatId}`)
+        return response.data
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data)
+        }
+    }
+}

@@ -5,7 +5,8 @@ import BubbleMessage from './BubbleMessage'
 import ChatInput from './ChatInput'
 import { useAuth } from '../../hooks/useAuth'
 import { socket } from '../../libs/socket'
-import { getConversationByParticipants, sendMessage } from '../../API/chatApi'
+import { getConversationByParticipants, sendMessage, markAsRead } from '../../API/chatApi'
+import UnreadBadge from './UnreadBadge'
 
 
 const ClientChat = ({ freelancer }) => {
@@ -16,23 +17,33 @@ const ClientChat = ({ freelancer }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState([])
   const [conversationId, setConversationId] = useState(null)
+   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(false)
   
   const messagesEndRef = useRef(null)
+  const processedMessageIds = useRef(new Set())
 
   useEffect(() => {
-    if (isOpen && freelancer?._id && currentUserId) {
+    if (freelancer?._id && currentUserId) {
       const loadConversation = async () => {
-        setLoading(true);
+        setLoading(true)
         try {
           const data = await getConversationByParticipants(freelancer._id)
 
           if (data) {
             setConversationId(data._id)
             setMessages(data.messages || [])
+
+            processedMessageIds.current = new Set(data.messages.map(m => String(m._id)))
+
             socket.emit("join_chat", data._id)
+
+            const isMeClient = true
+            
+            const initialUnread = isMeClient ? (data.clientUnread || 0) : (data.freelancerUnread || 0)
+            setUnreadCount(initialUnread)
           } else {
-            setMessages([]);
+            setMessages([])
             setConversationId(null)
           }
 
@@ -46,12 +57,20 @@ const ClientChat = ({ freelancer }) => {
 
       loadConversation()
     }
-  }, [isOpen, freelancer, currentUserId])
+  }, [freelancer, currentUserId])
 
   useEffect(() => {
     const handleReceiveMessage = (incomingMessage) => {
       if (conversationId && incomingMessage.conversationId === conversationId) {
-          setMessages((prev) => [...prev, incomingMessage.newMessage])
+          setMessages((prev) => {
+            [...prev, incomingMessage.newMessage]
+
+            if (!isOpen) {
+              setUnreadCount(prev => prev + 1)
+            }
+
+            return [...prev, incomingMessage.newMessage]
+          })
       }
     }
 
@@ -60,9 +79,9 @@ const ClientChat = ({ freelancer }) => {
     return () => {
       socket.off("receive_message", handleReceiveMessage)
     }
-  }, [conversationId])
+  }, [conversationId, isOpen])
 
-  // Auto-scroll para los mensajes
+  // Autoscroll para los mensajes
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, isOpen])
@@ -80,7 +99,7 @@ const ClientChat = ({ freelancer }) => {
       const response = await sendMessage(newMessage)
 
       if (!conversationId) {
-        // CASO: Conversación Nueva
+        // CASO: Conversación nueva
         setConversationId(response._id)
         socket.emit("join_chat", response._id)
         
@@ -90,6 +109,18 @@ const ClientChat = ({ freelancer }) => {
     } catch (error) {
       console.error("Error al enviar el mensaje", error)
     }
+  }
+
+  const toggleChat = async () => {
+      const newIsOpen = !isOpen;
+      setIsOpen(newIsOpen);
+
+      if (newIsOpen) {
+          setUnreadCount(0)
+          if (conversationId) {
+            await markAsRead(conversationId)
+          }
+      }
   }
 
   const formatMessageForUI = (msg) => {
@@ -109,9 +140,15 @@ const ClientChat = ({ freelancer }) => {
     {/* Botón flotante */}
       {!isOpen && (
         <button
-            onClick={() => setIsOpen(true)} 
+            onClick={toggleChat} 
             className="fixed bottom-6 right-6 bg-secondary hover:bg-hover-morado text-white p-4 rounded-full shadow-lg transition-transform hover:scale-110 z-50 cursor-pointer">
             <LuMessageCircle size={24} />
+
+            {unreadCount > 0 && (
+                <div className="absolute -top-1 -right-1 z-50">
+                    <UnreadBadge count={unreadCount} />
+                </div>
+            )}
         </button>
       )}
 
