@@ -5,7 +5,7 @@ export default function FreelancerCard({ data }) {
         <div className="flex flex-col justify-between bg-white p-4 rounded-2xl shadow-md border border-gray-100">
             <div className="flex items-center gap-4">
                 <img
-                    src={data.image}
+                    src={data.image || "user-image.webp"}
                     alt={data.firstname}
                     className="w-14 h-14 rounded-full object-cover"
                 />
@@ -30,7 +30,7 @@ export default function FreelancerCard({ data }) {
                         key={index}
                         className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs"
                     >
-                        {skill}
+                        {skill.name}
                     </span>
                 ))}
             </div>
