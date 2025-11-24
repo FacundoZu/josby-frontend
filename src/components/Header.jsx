@@ -11,9 +11,12 @@ import { MdLogout, MdInbox } from "react-icons/md";
 import { IoMenu } from "react-icons/io5";
 import { MdClose } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
+import { useConversations } from "../hooks/useConversations";
+import UnreadBadge from "./chat/UnreadBadge";
 
 const Header = () => {
   const { data } = useAuth();
+  const { data: conversations } = useConversations()
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -69,7 +72,9 @@ const Header = () => {
     };
   }, [isMenuOpen]);
 
-  // if (isLoading) return null
+  const totalUnread = conversations?.reduce((acc, chat) => {
+    return acc + (chat.unread || 0)
+  }, 0)
 
   //Todo: Agregas las rutas correctas de los NavLinks
   return (
@@ -233,10 +238,14 @@ const Header = () => {
             {isFreelancer ? (
               <NavLink
                 to="/chat" 
-                className="p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-full transition-all"
-                title="Inbox"
+                className=" relative p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-full transition-all"
               >
                 <MdInbox className="text-3xl" />
+                <div className="absolute top-0 right-0">
+                    {totalUnread > 0 && (
+                      <UnreadBadge count={totalUnread} />
+                    )}
+                </div>
               </NavLink>
             ) : (
               <NavLink

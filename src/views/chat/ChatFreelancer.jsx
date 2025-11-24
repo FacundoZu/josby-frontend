@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import BubbleMessage from '../../components/chat/BubbleMessage'
 import ChatInput from '../../components/chat/ChatInput'
 import { LuMessageCircle } from "react-icons/lu"
@@ -6,22 +6,27 @@ import { GoSearch } from "react-icons/go"
 import { MdKeyboardArrowLeft, MdClose } from "react-icons/md"
 import { useAuth } from '../../hooks/useAuth'
 import { socket } from '../../libs/socket'
-import { getConversations, getConversationById, sendMessage, searchConversations, markAsRead } from '../../API/chatApi'
+import { getConversationById, sendMessage, searchConversations, markAsRead } from '../../API/chatApi'
 import { toast } from 'react-toastify'
 import UnreadBadge from '../../components/chat/UnreadBadge'
+import { useConversations } from '../../hooks/useConversations'
+import { useQueryClient } from '@tanstack/react-query'
 
 const ChatFreelancer = () => {
   const { data: authData } = useAuth()
   const currentUser = authData?.user || authData
   const currentUserId = currentUser?.id || currentUser?._id
-  const [conversations, setConversations] = useState([])
+
+  const { data: serverConversations = [], loading } = useConversations()
+  const queryClient = useQueryClient()
+
+  const [searchResults, setSearchResults] = useState(null)
   const [activeChat, setActiveChat] = useState(null)
   const [selectedChatId, setSelectedChatId] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
-  const [loading, setLoading] = useState(true)
+
 
   const chatContainerRef = useRef(null)
-  const sidebarProcessedIds = useRef(new Set())
 
   // Auto-scroll
   useEffect(() => {
@@ -37,50 +42,27 @@ const ChatFreelancer = () => {
   }, [activeChat?.messages])
 
 
-  const fetchConversations = async () => {
-    try {
-      const data = await getConversations()
+  const rawConversations = searchTerm ? (searchResults || []) : serverConversations
 
-      // Asignar el último mensaje a lastMessage para el sidebar
-      const conversationsWithLast = (data || []).map(conv => ({
-        ...conv,
-        unread: conv.unread || 0,
-        lastMessage: conv.messages && conv.messages.length > 0 ? conv.messages[conv.messages.length - 1].message : ''
-      }))
-      setConversations(conversationsWithLast)
-
-      // Unirse a todas las salas de las conversaciones
-      if (Array.isArray(data)) {
-        data.forEach(conv => {
-          if (conv._id) socket.emit("join_chat", conv._id)
-        })
-      }
-
-    } catch (error) {
-      console.error("Error cargando las conversaciones:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchConversations()
-  }, [])
+  const conversations = useMemo(() => {
+    return rawConversations.map(conv => ({
+      ...conv,
+      unread: conv.unread || 0, 
+      lastMessage: conv.messages && conv.messages.length > 0 
+        ? conv.messages[conv.messages.length - 1].message 
+        : ''
+    }))
+  }, [rawConversations])
 
   const handleSelectChat = async (chatId) => {
       setSelectedChatId(chatId)
 
-      if (chatId) {
-          
-        setConversations(prev => prev.map(c => 
-          c._id === chatId ? { ...c, unread: 0 } : c
-        ))
-          
-        try {
-          await markAsRead(chatId)
-        } catch (error) {
-            console.error("Error al marcar mensajes como leido", error);
-        }
+      try{
+        await markAsRead(chatId)
+
+        queryClient.invalidateQueries(["conversations"])
+      }catch(error){
+        console.error("Error al marcar mensajes como leido", error)
       }
   }
 
@@ -105,18 +87,11 @@ const ChatFreelancer = () => {
     const delayDebounceFn = setTimeout(async () => {
       
       if (searchTerm.trim() === "") {
-        fetchConversations()
+        setSearchResults(null)
       } else {
         try {
           const results = await searchConversations(searchTerm)
-          
-          const formattedResults = (results || []).map(conv => ({
-             ...conv,
-             unread: conv.unread || 0,
-             lastMessage: conv.messages && conv.messages.length > 0 ? conv.messages[conv.messages.length - 1].message : ''
-          }))
-
-          setConversations(formattedResults)
+          setSearchResults(results)
         } catch (error) {
           console.error("Error en la búsqueda:", error)
           toast.error("Error al buscar conversaciones")
@@ -139,46 +114,17 @@ const ChatFreelancer = () => {
             messages: [...prev.messages, incomingMessage.newMessage]
           }
         })
+
+        markAsRead(selectedChatId)
       }
+      
+      queryClient.invalidateQueries(["conversations"])
 
-      updateSidebar(incomingMessage)
     }
 
-
-    const handleListUpdate = (incomingMessage) => {
-      updateSidebar(incomingMessage)
+    const handleListUpdate = () => {
+      queryClient.invalidateQueries(["conversations"])
     }
-
-    const updateSidebar = (incomingMessage) => {
-        if (sidebarProcessedIds.current.has(incomingMessage.newMessage?._id)) {
-          return
-        }
-        
-        sidebarProcessedIds.current.add(incomingMessage.newMessage?._id)
-
-        setConversations(prev => {
-          const chatIndex = prev.findIndex(c => String(c._id) === String(incomingMessage.conversationId))
-            
-          if (chatIndex === -1) {
-            if(searchTerm === "") fetchConversations() 
-            return prev
-          }
-
-          const isChatOpen = selectedChatId === incomingMessage.conversationId
-          const currentUnread = prev[chatIndex].unread || 0
-          const newUnread = isChatOpen ? 0 : currentUnread + 1
-    
-          const updatedChat = {
-            ...prev[chatIndex],
-            lastMessage: incomingMessage.newMessage.message,
-            updatedAt: new Date().toISOString(),
-            unread: newUnread
-          }
-    
-          return [updatedChat, ...prev.filter((_, i) => i !== chatIndex)]
-        })
-    }
-
 
     socket.on("receive_message", handleReceiveMessage)
     socket.on("chat_list_update", handleListUpdate) 
@@ -187,7 +133,7 @@ const ChatFreelancer = () => {
         socket.off("receive_message", handleReceiveMessage)
         socket.off("chat_list_update", handleListUpdate)
     }
-  }, [selectedChatId, searchTerm])
+  }, [selectedChatId, queryClient])
 
   const handleSendMessage = async (text) => {
     if (!activeChat) return
@@ -205,18 +151,7 @@ const ChatFreelancer = () => {
 
       await sendMessage(newMessagePayload)
 
-      setConversations(prev => {
-         const chatIndex = prev.findIndex(c => c._id === activeChat._id)
-         if (chatIndex === -1) return prev
-         
-         const updatedChat = {
-           ...prev[chatIndex],
-           lastMessage: text,
-           updatedAt: new Date().toISOString(),
-           unread: 0
-         }
-         return [updatedChat, ...prev.filter((_, i) => i !== chatIndex)]
-      })
+      queryClient.invalidateQueries(["conversations"])
 
     } catch (error) {
       console.error("Error enviando mensaje:", error)
@@ -275,14 +210,14 @@ const ChatFreelancer = () => {
                     </h3>
                     <span className="text-[10px] text-gray-400 shrink-0">{formatTime(chat.updatedAt)}</span>
                   </div>
-                  <p className={`text-xs truncate ${chat.unread > 0 ? 'font-semibold text-text-primary' : 'text-text-secondary-dark'}`}>
+                  <div className={`text-xs truncate ${chat.unread > 0 ? 'font-semibold text-text-primary' : 'text-text-secondary-dark'}`}>
                     {chat.lastMessage}
                     <div className="absolute top-5 -right-1 z-50">
                       {chat.unread > 0 && (
                           <UnreadBadge count={chat.unread} />
                       )}
                     </div>
-                  </p>
+                  </div>
                 </div>
               </div>
             ))

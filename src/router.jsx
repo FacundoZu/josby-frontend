@@ -7,10 +7,13 @@ import { ToastContainer } from "react-toastify";
 import Freelancers from "./views/freelancers/Freelancers";
 import Service from "./views/service/Service";
 import ChatFreelancer from "./views/chat/ChatFreelancer";
+import GlobalSocketListener from "./listeners/GlobalSocketListener";
 
 export default function router() {
     return (
         <BrowserRouter>
+            <GlobalSocketListener />
+            
             <Routes>
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Home />} />
