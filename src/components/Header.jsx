@@ -156,9 +156,14 @@ const Header = () => {
                     <NavLink
                       onClick={() => setIsMenuOpen(false)}
                       to="/chat" 
-                      className="flex items-center gap-2 bg-white border border-gray-300 text-text-primary hover:bg-gray-100 px-4 py-2 rounded-md"
+                      className="relative flex items-center gap-2 bg-white border border-gray-300 text-text-primary hover:bg-gray-100 px-4 py-2 rounded-md"
                     >
                       <MdInbox className="text-xl" /> Mensajes
+                      <div className="absolute right-1">
+                        {totalUnread > 0 && (
+                          <UnreadBadge count={totalUnread} />
+                        )}
+                      </div>
                     </NavLink>
                   ) : (
                     <NavLink
@@ -242,9 +247,9 @@ const Header = () => {
               >
                 <MdInbox className="text-3xl" />
                 <div className="absolute top-0 right-0">
-                    {totalUnread > 0 && (
-                      <UnreadBadge count={totalUnread} />
-                    )}
+                  {totalUnread > 0 && (
+                    <UnreadBadge count={totalUnread} />
+                  )}
                 </div>
               </NavLink>
             ) : (
