@@ -1,20 +1,48 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
-import { getFreelancers } from "../../API/freelancerApi";
+import { getFreelancers, getCategories, getSkills } from "../../API/freelancerApi";
 import FreelancerCard from "./FreelancerCard";
 import FreelancerCardSkeleton from "./FreelancerCardSkeleton";
 import FreelancerFilters from "./FreelancerFilters";
+import { toSlug, findBySlug, slugsToIds, idsToSlugs } from "../../utils/urlHelpers";
 
 export default function FreelancerList() {
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+  });
+
+  const { data: skills = [] } = useQuery({
+    queryKey: ["skills"],
+    queryFn: getSkills,
+  });
+
+  const categorySlug = searchParams.get("category") || "";
+  const skillSlugs = searchParams.get("skills") ? searchParams.get("skills").split(",") : [];
+
+  const categoryId = categorySlug ? findBySlug(categories, categorySlug)?._id || "" : "";
+  const skillIds = slugsToIds(skills, skillSlugs);
+
   const [filters, setFilters] = useState({
     search: searchParams.get("search") || "",
-    category: searchParams.get("category") || "",
-    skills: searchParams.get("skills") ? searchParams.get("skills").split(",") : [],
+    category: categoryId,
+    skills: skillIds,
     page: parseInt(searchParams.get("page")) || 1,
   });
+
+  useEffect(() => {
+    const newCategoryId = categorySlug ? findBySlug(categories, categorySlug)?._id || "" : "";
+    const newSkillIds = slugsToIds(skills, skillSlugs);
+
+    setFilters(prev => ({
+      ...prev,
+      category: newCategoryId,
+      skills: newSkillIds,
+    }));
+  }, [categories, skills, categorySlug, skillSlugs.join(",")]);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["freelancers", filters],
@@ -28,12 +56,25 @@ export default function FreelancerList() {
     const params = new URLSearchParams();
 
     if (filters.search) params.set("search", filters.search);
-    if (filters.category) params.set("category", filters.category);
-    if (filters.skills.length > 0) params.set("skills", filters.skills.join(","));
+
+    if (filters.category) {
+      const category = categories.find(cat => cat._id === filters.category);
+      if (category) {
+        params.set("category", toSlug(category.name));
+      }
+    }
+
+    if (filters.skills.length > 0) {
+      const skillSlugs = idsToSlugs(skills, filters.skills);
+      if (skillSlugs.length > 0) {
+        params.set("skills", skillSlugs.join(","));
+      }
+    }
+
     if (filters.page > 1) params.set("page", filters.page);
 
     setSearchParams(params, { replace: true });
-  }, [filters]);
+  }, [filters, categories, skills]);
 
   const handleFilterChange = (newFilters) => {
     setFilters({
