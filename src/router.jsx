@@ -8,6 +8,8 @@ import Freelancers from "./views/freelancers/Freelancers";
 import Service from "./views/service/Service";
 import ChatFreelancer from "./views/chat/ChatFreelancer";
 import GlobalSocketListener from "./listeners/GlobalSocketListener";
+import FormServices from "./views/formServices";
+
 
 export default function router() {
     return (
@@ -19,7 +21,7 @@ export default function router() {
                     <Route index element={<Home />} />
                     <Route path="/freelancers" element={<Freelancers />} />
                     <Route path="/service/:id" element={<Service />} />
-                                    <Route path="/service" element={<formServices />} />
+                    <Route path="/service" element={<FormServices />} />
                     <Route path="/chat" element={<ChatFreelancer />} />
 
                 </Route>

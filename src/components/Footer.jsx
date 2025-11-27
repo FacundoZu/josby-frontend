@@ -19,7 +19,7 @@ const Footer = () => {
               Servicios
             </Link>
             <Link
-              to="/"
+              to="/freelancers"
               className="text-text-secondary-light hover:text-white transition-colors"
             >
               Freelancers
