@@ -144,7 +144,7 @@ const Service = () => {
 
         {/* COLUMNA DERECHA*/}
         <div className="lg:col-span-1">
-            <PricingCard price={service.price} features={service.features} deliveryTime={service.deliveryTime} title={service.title} />
+            <PricingCard id={id} price={service.price} features={service.features} deliveryTime={service.deliveryTime} title={service.title} />
         </div>
       </div>
 

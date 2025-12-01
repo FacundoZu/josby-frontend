@@ -102,7 +102,7 @@ const Login = () => {
                     {/* 3. BOTÓN INICIAR SESIÓN */}
                     <button
                         type="submit"
-                        className="w-full bg-[#38ced6] hover:bg-[#2aa8b0] text-[#ffffff] font-bold py-3 rounded-lg transition duration-300 shadow-lg shadow-[#cffafe]/50 active:scale-[0.98]"
+                        className="w-full bg-[#38ced6] hover:bg-[#2aa8b0] text-[#ffffff] font-bold py-3 rounded-lg transition duration-300 shadow-lg shadow-[#cffafe]/50 active:scale-[0.98] cursor-pointer"
                         disabled={isPending}
                     >
                         {isPending ? "Iniciando..." : "Iniciar Sesión"}

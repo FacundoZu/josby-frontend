@@ -1,7 +1,25 @@
 import { LuClock2 } from "react-icons/lu"
 import { FaCheck } from "react-icons/fa6"
+import { createOrder } from "../../API/orderApi.js"
+import { toast } from "react-toastify"
+import { useAuth } from "../../hooks/useAuth.js"
+import { Link } from "react-router"
 
-const PricingCard = ({ price, features, deliveryTime, title }) => {
+const PricingCard = ({ id, price, features, deliveryTime, title }) => {
+  const { data } = useAuth()
+
+  const handleCreateOrder = async () => {
+    try{
+      const { status } = await createOrder(id)
+
+      if(status === 201){
+        toast.success("Servicio contratado.")
+      }
+    }catch(error){
+      console.error(error)
+      toast.error("Error al contratar el servicio")
+    }
+  }
 
   return (
     <div className="sticky top-8 border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
@@ -25,9 +43,22 @@ const PricingCard = ({ price, features, deliveryTime, title }) => {
         ))}
       </ul>
 
-      <button className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-lg transition-colors shadow-md hover:shadow-lg cursor-pointer">
-        Contratar
-      </button>
+      {data ? (
+        <button 
+          className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-lg transition-colors shadow-md hover:shadow-lg cursor-pointer"
+          onClick={handleCreateOrder}
+        >
+          Contratar
+        </button>
+      ) : (
+        <Link
+          to={"/login"}
+        >
+          <button className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-lg transition-colors shadow-md hover:shadow-lg cursor-pointer">
+            Contratar
+          </button>
+        </Link>
+      )}
       <p className="text-center text-xs text-text-secondary-dark/70 mt-3">Pago 100% seguro</p>
     </div>
   )
