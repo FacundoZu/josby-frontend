@@ -141,7 +141,7 @@ const Header = () => {
                 ) : (
                   <NavLink
                     onClick={() => setIsMenuOpen(false)}
-                    to="/" 
+                    to="/service" 
                     className="hover:text-hover-cyan transition-colors"
                   >
                     Ofrecer servicio
@@ -232,7 +232,7 @@ const Header = () => {
               Mis pedidos
             </NavLink>
           ) : (
-            <NavLink to="/" className="hover:text-hover-cyan transition-colors">
+            <NavLink to="/service" className="hover:text-hover-cyan transition-colors">
               Ofrecer servicio
             </NavLink>
           )}
