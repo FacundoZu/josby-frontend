@@ -154,30 +154,23 @@ const MisPedidos = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [orders, setOrders] = useState(MOCK_ORDERS);
 
-    const handleRequestChanges = (orderId) => {
-        const message = window.prompt(
-            "Contale al freelancer qué cambios necesitás:"
-        );
-
-        if (!message || message.trim().length === 0) {
-            return; // si cancela o deja vacío, no hacemos nada
-        }
-
+    const handleRequestChanges = (orderId, message) => {
         const trimmed = message.trim();
+        if (!trimmed) return;
 
         setOrders((prev) =>
             prev.map((order) =>
                 order.id === orderId
                     ? {
                         ...order,
-                        status: "in_process", // vuelve a estar en proceso
+                        status: "in_process", // vuelve a “En proceso”
                         lastUpdate: `Solicitaste cambios: "${trimmed}"`,
                     }
                     : order
             )
         );
 
-        // Por ahora solo lo mostramos en consola (lugar claro para futura integración)
+        // Lugar claro para futura integración (API / chat)
         console.log("Solicitud de cambios para", orderId, "=>", trimmed);
     };
 
@@ -294,7 +287,7 @@ const MisPedidos = () => {
                                 order={order}
                                 onViewDetails={setSelectedOrder}
                                 onAcceptDelivery={handleAcceptDelivery}
-                                onRequestChanges={handleRequestChanges}
+                                onRequestChanges={handleRequestChanges}  // 👈 así
                             />
                         ))}
                     </div>
@@ -318,6 +311,8 @@ function OrderCard({
     onRequestChanges,
 }) {
     const statusCfg = STATUS_CONFIG[order.status];
+    const [isRequesting, setIsRequesting] = useState(false);
+    const [requestText, setRequestText] = useState("");
 
     return (
         <article className="flex flex-col gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm transition hover:shadow-md md:flex-row md:items-stretch">
@@ -414,21 +409,62 @@ function OrderCard({
 
 
                     {order.status === "review" && (
-                        <div className="flex flex-col gap-2 pt-1 md:items-end">
-                            <button
-                                type="button"
-                                onClick={() => onAcceptDelivery(order.id)}
-                                className="inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
-                            >
-                                Aceptar entrega
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => onRequestChanges(order.id)}
-                                className="inline-flex w-full items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-1.5 text-xs font-medium text-[#718096] transition hover:bg-[#F7FAFC] md:w-auto"
-                            >
-                                Solicitar cambios
-                            </button>
+                        <div className="flex w-full flex-col gap-2 pt-1 md:items-end">
+                            {/* Botones principales */}
+                            <div className="flex flex-col gap-2 md:flex-row md:justify-end md:w-full">
+                                <button
+                                    type="button"
+                                    onClick={() => onAcceptDelivery(order.id)}
+                                    className="inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
+                                >
+                                    Aceptar entrega
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsRequesting((prev) => !prev)}
+                                    className="inline-flex w-full items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-1.5 text-xs font-medium text-[#718096] transition hover:bg-[#F7FAFC] md:w-auto"
+                                >
+                                    {isRequesting ? "Cancelar solicitud" : "Solicitar cambios"}
+                                </button>
+                            </div>
+
+                            {/* Cuadro de solicitud de cambios */}
+                            {isRequesting && (
+                                <div className="w-full rounded-2xl border border-[#E2E8F0] bg-[#F7FAFC] p-3 text-xs text-[#1A202C] md:max-w-xs">
+                                    <p className="mb-2 font-semibold">Detalles de los cambios</p>
+                                    <textarea
+                                        className="w-full resize-none rounded-lg border border-[#E2E8F0] bg-white px-2 py-1 text-xs text-[#1A202C] placeholder:text-[#A0AEC0] focus:border-[#5834b7] focus:outline-none focus:ring-1 focus:ring-[#5834b733]"
+                                        rows={3}
+                                        placeholder="Explicá brevemente qué te gustaría ajustar (colores, textos, formato, etc.)..."
+                                        value={requestText}
+                                        onChange={(e) => setRequestText(e.target.value)}
+                                    />
+                                    <div className="mt-2 flex justify-end gap-2">
+                                        <button
+                                            type="button"
+                                            className="inline-flex items-center justify-center rounded-full border border-[#E2E8F0] px-3 py-1 text-xs font-medium text-[#718096] hover:bg-[#EDF2F7]"
+                                            onClick={() => {
+                                                setIsRequesting(false);
+                                                setRequestText("");
+                                            }}
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="inline-flex items-center justify-center rounded-full bg-[#5834b7] px-3 py-1 text-xs font-medium text-white shadow-sm transition hover:bg-[#6a44c9]"
+                                            onClick={() => {
+                                                if (!requestText.trim()) return;
+                                                onRequestChanges(order.id, requestText);
+                                                setIsRequesting(false);
+                                                setRequestText("");
+                                            }}
+                                        >
+                                            Enviar solicitud
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
