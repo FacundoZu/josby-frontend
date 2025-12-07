@@ -154,7 +154,7 @@ const MisPedidos = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [orders, setOrders] = useState(MOCK_ORDERS);
 
-    const handleRequestChanges = (orderId, message) => {
+    const handleRequestChanges = (orderId, message, files) => {
         const trimmed = message.trim();
         if (!trimmed) return;
 
@@ -170,8 +170,14 @@ const MisPedidos = () => {
             )
         );
 
-        // Lugar claro para futura integración (API / chat)
         console.log("Solicitud de cambios para", orderId, "=>", trimmed);
+
+        if (files && files.length > 0) {
+            console.log(
+                "Archivos adjuntos:",
+                files.map((f) => f.name)
+            );
+        }
     };
 
     const filteredOrders = useMemo(() => {
@@ -313,6 +319,11 @@ function OrderCard({
     const statusCfg = STATUS_CONFIG[order.status];
     const [isRequesting, setIsRequesting] = useState(false);
     const [requestText, setRequestText] = useState("");
+    const [attachedFiles, setAttachedFiles] = useState([]);
+    const handleFilesChange = (e) => {
+        const filesArray = Array.from(e.target.files || []);
+        setAttachedFiles(filesArray);
+    };
 
     return (
         <article className="flex flex-col gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm transition hover:shadow-md md:flex-row md:items-stretch">
@@ -432,6 +443,7 @@ function OrderCard({
                             {isRequesting && (
                                 <div className="w-full rounded-2xl border border-[#E2E8F0] bg-[#F7FAFC] p-3 text-xs text-[#1A202C] md:max-w-xs">
                                     <p className="mb-2 font-semibold">Detalles de los cambios</p>
+
                                     <textarea
                                         className="w-full resize-none rounded-lg border border-[#E2E8F0] bg-white px-2 py-1 text-xs text-[#1A202C] placeholder:text-[#A0AEC0] focus:border-[#5834b7] focus:outline-none focus:ring-1 focus:ring-[#5834b733]"
                                         rows={3}
@@ -439,13 +451,38 @@ function OrderCard({
                                         value={requestText}
                                         onChange={(e) => setRequestText(e.target.value)}
                                     />
-                                    <div className="mt-2 flex justify-end gap-2">
+
+                                    {/* Adjuntar archivos */}
+                                    <div className="mt-2">
+                                        <label className="mb-1 block text-[11px] font-semibold text-[#4A5568]">
+                                            Adjuntar archivos (opcional)
+                                        </label>
+                                        <input
+                                            type="file"
+                                            multiple
+                                            className="block w-full text-[11px] text-[#718096] file:mr-2 file:rounded-full file:border-0 file:bg-[#E2E8F0] file:px-2 file:py-1 file:text-[11px] file:font-medium file:text-[#1A202C] hover:file:bg-[#CBD5E0]"
+                                            onChange={handleFilesChange}
+                                        />
+
+                                        {attachedFiles.length > 0 && (
+                                            <ul className="mt-1 space-y-1 text-[11px] text-[#4A5568]">
+                                                {attachedFiles.map((file) => (
+                                                    <li key={file.name} className="truncate">
+                                                        • {file.name}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+
+                                    <div className="mt-3 flex justify-end gap-2">
                                         <button
                                             type="button"
                                             className="inline-flex items-center justify-center rounded-full border border-[#E2E8F0] px-3 py-1 text-xs font-medium text-[#718096] hover:bg-[#EDF2F7]"
                                             onClick={() => {
                                                 setIsRequesting(false);
                                                 setRequestText("");
+                                                setAttachedFiles([]);
                                             }}
                                         >
                                             Cancelar
@@ -455,9 +492,10 @@ function OrderCard({
                                             className="inline-flex items-center justify-center rounded-full bg-[#5834b7] px-3 py-1 text-xs font-medium text-white shadow-sm transition hover:bg-[#6a44c9]"
                                             onClick={() => {
                                                 if (!requestText.trim()) return;
-                                                onRequestChanges(order.id, requestText);
+                                                onRequestChanges(order.id, requestText, attachedFiles);
                                                 setIsRequesting(false);
                                                 setRequestText("");
+                                                setAttachedFiles([]);
                                             }}
                                         >
                                             Enviar solicitud
