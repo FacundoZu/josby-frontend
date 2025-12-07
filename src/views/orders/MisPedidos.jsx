@@ -154,6 +154,33 @@ const MisPedidos = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [orders, setOrders] = useState(MOCK_ORDERS);
 
+    const handleRequestChanges = (orderId) => {
+        const message = window.prompt(
+            "Contale al freelancer qué cambios necesitás:"
+        );
+
+        if (!message || message.trim().length === 0) {
+            return; // si cancela o deja vacío, no hacemos nada
+        }
+
+        const trimmed = message.trim();
+
+        setOrders((prev) =>
+            prev.map((order) =>
+                order.id === orderId
+                    ? {
+                        ...order,
+                        status: "in_process", // vuelve a estar en proceso
+                        lastUpdate: `Solicitaste cambios: "${trimmed}"`,
+                    }
+                    : order
+            )
+        );
+
+        // Por ahora solo lo mostramos en consola (lugar claro para futura integración)
+        console.log("Solicitud de cambios para", orderId, "=>", trimmed);
+    };
+
     const filteredOrders = useMemo(() => {
         return orders.filter((order) => {
             const matchStatus =
@@ -267,6 +294,7 @@ const MisPedidos = () => {
                                 order={order}
                                 onViewDetails={setSelectedOrder}
                                 onAcceptDelivery={handleAcceptDelivery}
+                                onRequestChanges={handleRequestChanges}
                             />
                         ))}
                     </div>
@@ -283,7 +311,12 @@ const MisPedidos = () => {
     );
 };
 
-function OrderCard({ order, onViewDetails, onAcceptDelivery }) {
+function OrderCard({
+    order,
+    onViewDetails,
+    onAcceptDelivery,
+    onRequestChanges,
+}) {
     const statusCfg = STATUS_CONFIG[order.status];
 
     return (
@@ -391,6 +424,7 @@ function OrderCard({ order, onViewDetails, onAcceptDelivery }) {
                             </button>
                             <button
                                 type="button"
+                                onClick={() => onRequestChanges(order.id)}
                                 className="inline-flex w-full items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-1.5 text-xs font-medium text-[#718096] transition hover:bg-[#F7FAFC] md:w-auto"
                             >
                                 Solicitar cambios
