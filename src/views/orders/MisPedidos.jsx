@@ -152,9 +152,10 @@ const MisPedidos = () => {
     const [statusFilter, setStatusFilter] = useState("all");
     const [search, setSearch] = useState("");
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [orders, setOrders] = useState(MOCK_ORDERS);
 
     const filteredOrders = useMemo(() => {
-        return MOCK_ORDERS.filter((order) => {
+        return orders.filter((order) => {
             const matchStatus =
                 statusFilter === "all" || order.status === statusFilter;
 
@@ -165,7 +166,22 @@ const MisPedidos = () => {
 
             return matchStatus && matchSearch;
         });
-    }, [statusFilter, search]);
+    }, [orders, statusFilter, search]);
+
+    const handleAcceptDelivery = (orderId) => {
+        setOrders((prev) =>
+            prev.map((order) =>
+                order.id === orderId
+                    ? {
+                        ...order,
+                        status: "delivered",
+                        lastUpdate:
+                            "Entrega aceptada. El pago fue liberado al freelancer.",
+                    }
+                    : order
+            )
+        );
+    };
 
     return (
         <div className="min-h-screen bg-[#f6ffff]">
@@ -188,8 +204,8 @@ const MisPedidos = () => {
                                     type="button"
                                     onClick={() => setStatusFilter(key)}
                                     className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${statusFilter === "all"
-                                            ? "bg-[#5834b7] text-white shadow-sm"
-                                            : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
+                                        ? "bg-[#5834b7] text-white shadow-sm"
+                                        : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
                                         }`}
                                 >
                                     {cfg.label}
@@ -200,8 +216,8 @@ const MisPedidos = () => {
                                     type="button"
                                     onClick={() => setStatusFilter(key)}
                                     className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${statusFilter === key
-                                            ? "bg-[#5834b7] text-white shadow-sm"
-                                            : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
+                                        ? "bg-[#5834b7] text-white shadow-sm"
+                                        : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
                                         }`}
                                 >
                                     {cfg.label}
@@ -250,6 +266,7 @@ const MisPedidos = () => {
                                 key={order.id}
                                 order={order}
                                 onViewDetails={setSelectedOrder}
+                                onAcceptDelivery={handleAcceptDelivery}
                             />
                         ))}
                     </div>
@@ -266,7 +283,7 @@ const MisPedidos = () => {
     );
 };
 
-function OrderCard({ order, onViewDetails }) {
+function OrderCard({ order, onViewDetails, onAcceptDelivery }) {
     const statusCfg = STATUS_CONFIG[order.status];
 
     return (
@@ -367,6 +384,7 @@ function OrderCard({ order, onViewDetails }) {
                         <div className="flex flex-col gap-2 pt-1 md:items-end">
                             <button
                                 type="button"
+                                onClick={() => onAcceptDelivery(order.id)}
                                 className="inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
                             >
                                 Aceptar entrega
