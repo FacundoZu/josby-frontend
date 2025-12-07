@@ -135,14 +135,14 @@ const MOCK_ORDERS = [
                 name: "Link_sitio_producción.txt",
                 type: "Link",
                 uploadedAt: "2025-11-22",
-                url: "#",
+                url: "https://google.com", // sitio memo
             },
             {
                 id: "DEL-0004-2",
                 name: "Código_fuente.zip",
                 type: "Archivo comprimido",
                 uploadedAt: "2025-11-21",
-                url: "#",
+                url: "#", // este lo dejamos como demo
             },
         ],
     },
@@ -610,7 +610,14 @@ function OrderDetailModal({ order, onClose }) {
                                                 type="button"
                                                 className="ml-3 inline-flex items-center justify-center rounded-full border border-[#E2E8F0] px-3 py-1 text-xs font-medium text-[#5834b7] hover:bg-[#F7FAFC]"
                                                 onClick={() => {
-                                                    console.log("Ver entregable:", file);
+                                                    if (file.url && file.url !== "#") {
+                                                        window.open(file.url, "_blank", "noopener,noreferrer");
+                                                    } else {
+                                                        alert(
+                                                            `Este es un entregable de ejemplo (${file.name}). ` +
+                                                            "En la versión conectada abriría el archivo real."
+                                                        );
+                                                    }
                                                 }}
                                             >
                                                 Ver
