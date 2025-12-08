@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useMemo, useState } from "react";
-import { acceptOrder, finalizeOrder, getOrderByUser } from "../../API/orderApi";
+import { acceptDelivery, acceptOrder, addDeliverable, finalizeOrder, getOrderByUser } from "../../API/orderApi";
 import { Link, useSearchParams } from "react-router";
 import Spinner from "../../components/Spinner";
 import { useAuth } from "../../hooks/useAuth";
@@ -77,7 +77,7 @@ const MisPedidos = () => {
             estimatedDelivery: order.fechaEntrega,
             price: order.precio,
             status: mapStatus(order.estado),
-            lastUpdate: order.lastUpdateInfo || "Sin actualizaciones aún",
+            lastUpdate: order.updatedAt,
             deliverables: order.entregables || []
         }
     }
@@ -156,55 +156,11 @@ const MisPedidos = () => {
         }
     }
 
-    const updateOrderStatus = (orderId, newStatus, updateText) => {
-        setOrders((prev) =>
-        prev.map((order) =>
-            order.id === orderId
-            ? {
-                ...order,
-                status: newStatus,
-                lastUpdate: updateText ?? order.lastUpdate,
-                }
-            : order
-        )
-        );
-    };
-
-    const handleAddDeliverable = (orderId, newDeliverable) => {
-        setOrders((prev) =>
-        prev.map((order) =>
-            order.id === orderId
-            ? {
-                ...order,
-                deliverables: [...(order.deliverables || []), newDeliverable],
-                status: "review",
-                lastUpdate:
-                    "Subiste un nuevo entregable. El cliente puede revisarlo.",
-                }
-            : order
-        )
-        );
-    };
-
-    const handleAcceptDelivery = (orderId) => {
-        setOrders((prev) =>
-            prev.map((order) =>
-                order.id === orderId
-                    ? {
-                        ...order,
-                        status: "delivered",
-                        lastUpdate:
-                            "Entrega aceptada. El pago fue liberado al freelancer.",
-                    }
-                    : order
-            )
-        );
-    };
-
+    
     async function handleAcceptOrder(orderId) {
         try {
             setLoading(true)
-
+            
             const response = await acceptOrder(orderId)
 
             const data = await getOrderByUser({ search, status, page, limit })
@@ -213,12 +169,34 @@ const MisPedidos = () => {
             )
 
             toast.success(response.message)
-
+            
         } catch (error) {
             console.error(error)
             toast.error("Error al aceptar el pedido")
-
+            
         } finally {
+            setLoading(false)
+        }
+    }
+    
+    const handleAcceptDelivery = async (orderId) => {
+        try{
+            setLoading(true)
+
+            const response = await acceptDelivery(orderId)
+
+            const data = await getOrderByUser({ search, status, page, limit })
+             setOrders(
+                data.orders.map(order => mapOrder(order))
+            )
+
+            toast.success(response.message)
+
+        }catch(error){
+            console.error(error)
+            toast.error("Error al aceptar la entrega")
+
+        }finally{
             setLoading(false)
         }
     }
@@ -241,6 +219,31 @@ const MisPedidos = () => {
             toast.error("Error al finalizar el pedido")
 
         } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleAddDeliverable = async (orderId, entregable) => {
+        try {
+            setLoading(true)
+            await addDeliverable(orderId, {
+                nombre: entregable.name,
+                url: entregable.url,
+            })
+
+            toast.success("Entregable guardado correctamente")
+            setOrderToAddDeliverable(null)
+
+            const data = await getOrderByUser({ search, status, page, limit })
+            setOrders(
+                data.orders.map(order => mapOrder(order))
+            )
+
+        } catch (error) {
+            console.error(error)
+            toast.error("Error al subir los entregables")
+
+        }finally{
             setLoading(false)
         }
     }
@@ -365,7 +368,6 @@ const MisPedidos = () => {
                                 onViewDetails={setSelectedOrder}
                                 onAskAccept={setOrderToConfirm}
                                 onAskRequestChanges={setOrderToRequestChanges}
-                                onUpdateStatus={updateOrderStatus}
                                 onOpenAddDeliverable={setOrderToAddDeliverable}
                                 handleAcceptOrder={handleAcceptOrder}
                                 handleFinalizeOrder={handleFinalizeOrder}
@@ -414,10 +416,7 @@ const MisPedidos = () => {
                 <AddDeliverableModal
                     order={orderToAddDeliverable}
                     onClose={() => setOrderToAddDeliverable(null)}
-                    onSubmit={(id, newDeliverable) => {
-                    handleAddDeliverable(id, newDeliverable);
-                    setOrderToAddDeliverable(null);
-                }}
+                    onSubmit={handleAddDeliverable}
                 />
             )}
 
@@ -454,7 +453,6 @@ function OrderCard({
     onViewDetails,
     onAskAccept,
     onAskRequestChanges,
-    onUpdateStatus,
     onOpenAddDeliverable,
     handleAcceptOrder,
     handleFinalizeOrder,
@@ -549,11 +547,6 @@ function OrderCard({
                         </span>
                     </span>
                 </div>
-
-                {/* Última actualización */}
-                <p className="mt-2 text-xs text-[#718096] sm:text-sm">
-                    {order.lastUpdate}
-                </p>
             </div>
 
             {/* Precio y acciones */}
@@ -649,14 +642,7 @@ function OrderCard({
                             {canAccept && (
                             <button
                                 type="button"
-                                onClick={() =>
-                                // onUpdateStatus(
-                                //     order.id,
-                                //     "in_process",
-                                //     "Aceptaste el pedido. El estado ahora es En proceso."
-                                // )
-                                    handleAcceptOrder(order.id)
-                                }
+                                onClick={() => handleAcceptOrder(order.id)}
                                 className="cursor-pointer inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
                             >
                                 Aceptar pedido
@@ -676,14 +662,7 @@ function OrderCard({
                             {canMarkDelivered && (
                             <button
                                 type="button"
-                                onClick={() =>
-                                // onUpdateStatus(
-                                //     order.id,
-                                //     "delivered",
-                                //     "Marcaste el pedido como finalizado. Esperá a que el cliente acepte la entrega."
-                                // )
-                                    handleFinalizeOrder(order.id)
-                                }
+                                onClick={() =>handleFinalizeOrder(order.id)}
                                 className="cursor-pointer inline-flex w-full items-center justify-center rounded-full border border-[#28a745] px-4 py-1.5 text-xs font-medium text-[#28a745] transition hover:bg-[#28a74510] md:w-auto"
                             >
                                 Marcar como finalizado
@@ -701,14 +680,14 @@ function AcceptDeliveryModal({ order, onConfirm, onClose }) {
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6"
-            onClick={onClose} // 👈 click en el fondo cierra
+            onClick={onClose}
         >
             <div
                 className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="accept-delivery-title"
-                onClick={(e) => e.stopPropagation()} // 👈 evita que el click adentro cierre
+                onClick={(e) => e.stopPropagation()} 
             >
                 <div className="mb-3 flex items-start justify-between gap-4">
                     <div>
@@ -1052,10 +1031,10 @@ function OrderDetailModal({ order, onClose, userRole }) {
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="font-medium text-[#1A202C]">
-                                                        {file.name}
+                                                        {file.nombre}
                                                     </span>
                                                     <span className="text-xs text-[#718096]">
-                                                        {file.type} · Subido el{" "}
+                                                        Link · Subido el{" "}
                                                         {formatDate(file.uploadedAt)}
                                                     </span>
                                                 </div>
@@ -1112,7 +1091,12 @@ function OrderDetailModal({ order, onClose, userRole }) {
                             <p className="text-xs text-[#718096]">
                                 Última actualización
                             </p>
-                            <p className="mt-1 text-sm">{order.lastUpdate}</p>
+                            <p className="mt-1 text-sm">
+                                {new Date(order.lastUpdate).toLocaleString("es-AR", {
+                                    dateStyle: "short",
+                                    timeStyle: "short"
+                                })}
+                            </p>
                         </div>
                     </section>
 
@@ -1167,7 +1151,7 @@ function AddDeliverableModal({ order, onSubmit, onClose }) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6"
       onClick={onClose}
     >
-      <div
+      <form
         className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
         role="dialog"
         aria-modal="true"
@@ -1255,7 +1239,7 @@ function AddDeliverableModal({ order, onSubmit, onClose }) {
             Guardar entregable
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

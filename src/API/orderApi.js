@@ -59,6 +59,21 @@ export async function acceptOrder(id){
     }
 }
 
+export async function acceptDelivery(id){
+    try{
+        const url = `order/acceptDelivery/${id}`
+
+        const { data } = await api.put(url)
+        return data
+
+    }catch(error){
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error || "Error al aceptar la entrega")
+        }
+        throw error
+    }
+}
+
 export async function finalizeOrder(id){
     try{
         const url = `order/finalize/${id}`
@@ -69,6 +84,19 @@ export async function finalizeOrder(id){
     }catch(error){
         if (isAxiosError(error) && error.response) {
             throw new Error(error.response.data.error || "Error al finalizar el pedido")
+        }
+        throw error
+    }
+}
+
+export async function addDeliverable(orderId, entregable){
+    try{
+        const { data } = await api.post(`/order/submit/${orderId}`, entregable)
+        return data
+
+    }catch(error){
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error || "Error al subir los entregables")
         }
         throw error
     }
