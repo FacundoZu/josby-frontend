@@ -1,29 +1,6 @@
 import { useMemo, useState } from "react";
 import { formatDateEs, formatPriceArs } from "../../utils/formatters";
-
-const STATUS_CONFIG = {
-  all: { label: "Todos" },
-  pending: {
-    label: "Pendiente",
-    badgeClasses:
-      "bg-[#ffc10733] text-[#1A202C] border border-[#ffc10780]",
-  },
-  in_process: {
-    label: "En proceso",
-    badgeClasses:
-      "bg-[#38ced633] text-[#1A202C] border border-[#38ced680]",
-  },
-  review: {
-    label: "En revisión",
-    badgeClasses:
-      "bg-[#5834b733] text-[#1A202C] border border-[#5834b780]",
-  },
-  delivered: {
-    label: "Finalizado",
-    badgeClasses:
-      "bg-[#28a74533] text-[#1A202C] border border-[#28a74580]",
-  },
-};
+import { ORDER_STATUS_CONFIG } from "../../constants/orderStatus";
 
 // Datos mock pensados desde el lado del FREELANCER
 const MOCK_FREELANCER_ORDERS = [
@@ -188,7 +165,7 @@ const MisPedidosFreelancer = () => {
         <section className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Tabs de estado */}
           <div className="flex flex-wrap gap-2">
-            {Object.entries(STATUS_CONFIG).map(([key, cfg]) =>
+            {Object.entries(ORDER_STATUS_CONFIG).map(([key, cfg]) =>
               key === "all" ? (
                 <button
                   key={key}
@@ -317,7 +294,7 @@ function FreelancerOrderCard({
   onUpdateStatus,
   onOpenAddDeliverable,
 }) {
-  const statusCfg = STATUS_CONFIG[order.status];
+  const statusCfg = ORDER_STATUS_CONFIG[order.status];
 
   const canAccept = order.status === "pending";
   const canMarkInReview = order.status === "in_process";
@@ -656,7 +633,7 @@ function AddDeliverableModal({ order, onSubmit, onClose }) {
 }
 
 function FreelancerOrderDetailModal({ order, onClose }) {
-  const statusCfg = STATUS_CONFIG[order.status];
+  const statusCfg = ORDER_STATUS_CONFIG[order.status];
 
   return (
     <div

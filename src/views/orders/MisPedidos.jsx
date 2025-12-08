@@ -1,30 +1,6 @@
 import { useMemo, useState } from "react";
 import { formatDateEs, formatPriceArs } from "../../utils/formatters";
-
-
-const STATUS_CONFIG = {
-  all: { label: "Todos" },
-  pending: {
-    label: "Pendiente",
-    badgeClasses:
-      "bg-[#ffc10733] text-[#1A202C] border border-[#ffc10780]",
-  },
-  in_process: {
-    label: "En proceso",
-    badgeClasses:
-      "bg-[#38ced633] text-[#1A202C] border border-[#38ced680]",
-  },
-  review: {
-    label: "En revisión",
-    badgeClasses:
-      "bg-[#5834b733] text-[#1A202C] border border-[#5834b780]",
-  },
-  delivered: {
-    label: "Finalizado",
-    badgeClasses:
-      "bg-[#28a74533] text-[#1A202C] border border-[#28a74580]",
-  },
-};
+import { ORDER_STATUS_CONFIG } from "../../constants/orderStatus";
 
 // TODO: Reemplazar MOCK_ORDERS con datos reales del backend de Josby
 // cuando el endpoint de "mis pedidos" esté disponible.
@@ -232,7 +208,7 @@ const MisPedidos = () => {
         <section className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Tabs de estado */}
           <div className="flex flex-wrap gap-2">
-            {Object.entries(STATUS_CONFIG).map(([key, cfg]) =>
+            {Object.entries(ORDER_STATUS_CONFIG).map(([key, cfg]) =>
               key === "all" ? (
                 <button
                   key={key}
@@ -379,7 +355,7 @@ function OrderCard({
   onAskAccept,
   onAskRequestChanges,
 }) {
-  const statusCfg = STATUS_CONFIG[order.status];
+  const statusCfg = ORDER_STATUS_CONFIG[order.status];
 
   return (
     <article className="flex flex-col gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm transition hover:shadow-md md:flex-row md:items-stretch">
@@ -715,7 +691,7 @@ function RequestChangesModal({ order, onSubmit, onClose }) {
 }
 
 function OrderDetailModal({ order, onClose }) {
-  const statusCfg = STATUS_CONFIG[order.status];
+  const statusCfg = ORDER_STATUS_CONFIG[order.status];
   const [showDeliverables, setShowDeliverables] = useState(true);
 
   return (
