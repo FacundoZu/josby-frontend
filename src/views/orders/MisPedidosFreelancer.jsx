@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { formatDateEs, formatPriceArs } from "../../utils/formatters";
 import { ORDER_STATUS_CONFIG } from "../../constants/orderStatus";
+import { getDeliverableIcon } from "../../utils/deliverables";
 
 /**
  * @typedef {Object} Deliverable
@@ -919,8 +920,9 @@ function FreelancerOrderDetailModal({ order, onClose }) {
                   >
                     <div className="flex flex-1 items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F7FAFC] text-xs">
-                        📎
+                        {getDeliverableIcon(file.type)}
                       </div>
+
                       <div className="flex flex-col">
                         <span className="font-medium text-[#1A202C]">
                           {file.name}
