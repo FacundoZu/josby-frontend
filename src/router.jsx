@@ -11,7 +11,8 @@ import GlobalSocketListener from "./listeners/GlobalSocketListener";
 import FormServices from "./views/formServices";
 import { Profile } from "./views/Profile";
 import { EditProfile } from "./views/EditProfile";
-
+import MisPedidos from "./views/orders/MisPedidos";
+import MisPedidosFreelancer from "./views/orders/MisPedidosFreelancer";
 
 export default function router() {
     return (
@@ -27,6 +28,8 @@ export default function router() {
                     <Route path="/chat" element={<ChatFreelancer />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/edit-profile" element={<EditProfile />} />
+                    <Route path="mis-pedidos" element={<MisPedidos />} />
+                    <Route path="/mis-pedidos-freelancer" element={<MisPedidosFreelancer />} />
                 </Route>
 
                 <Route path="/login" element={<Login />} />
