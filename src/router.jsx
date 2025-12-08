@@ -4,6 +4,8 @@ import Layout from "./layouts/Layout";
 import Login from "./views/auth/Login";
 import Register from "./views/auth/Register";
 import MisPedidos from "./views/orders/MisPedidos";
+import MisPedidosFreelancer from "./views/orders/MisPedidosFreelancer";
+
 
 export default function Router() {
   return (
@@ -14,6 +16,7 @@ export default function Router() {
           <Route index element={<Home />} />
           {/* nueva ruta: /mis-pedidos */}
           <Route path="mis-pedidos" element={<MisPedidos />} />
+          <Route path="/mis-pedidos-freelancer" element={<MisPedidosFreelancer />} />
         </Route>
 
         {/* Rutas fuera del Layout */}
