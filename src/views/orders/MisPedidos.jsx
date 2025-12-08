@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { useMemo, useState } from "react";
-import { getOrderByUser } from "../../API/orderApi";
+import { acceptOrder, finalizeOrder, getOrderByUser } from "../../API/orderApi";
 import { Link, useSearchParams } from "react-router";
 import Spinner from "../../components/Spinner";
 import { useAuth } from "../../hooks/useAuth";
+import { toast } from "react-toastify"
 
 const STATUS_CONFIG = {
     all: { label: "Todos" },
@@ -42,6 +43,11 @@ const MisPedidos = () => {
     const [orderToAddDeliverable, setOrderToAddDeliverable] = useState(null);
     const [loading, setLoading] = useState(true)
 
+    // const search = searchParams.get("search") || ""
+    const status = searchParams.get("status") || ""
+    const page = searchParams.get("page") || 1
+    const limit = searchParams.get("limit") || 9
+
     const mapStatus = (estado) => {
         switch (estado) {
             case "pendiente":
@@ -79,11 +85,6 @@ const MisPedidos = () => {
     useEffect(() => {
         const getOrders = async () => {
             try{
-                const search = searchParams.get("search") || ""
-                const status = searchParams.get("status") || ""
-                const page = searchParams.get("page") || 1
-                const limit = searchParams.get("limit") || 9
-
                 const data = await getOrderByUser({ search, status, page, limit })
                 setOrders(
                     data.orders.map(order => mapOrder(order))
@@ -199,6 +200,50 @@ const MisPedidos = () => {
             )
         );
     };
+
+    async function handleAcceptOrder(orderId) {
+        try {
+            setLoading(true)
+
+            const response = await acceptOrder(orderId)
+
+            const data = await getOrderByUser({ search, status, page, limit })
+             setOrders(
+                data.orders.map(order => mapOrder(order))
+            )
+
+            toast.success(response.message)
+
+        } catch (error) {
+            console.error(error)
+            toast.error("Error al aceptar el pedido")
+
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    async function handleFinalizeOrder(orderId){
+         try {
+            setLoading(true)
+
+            const response = await finalizeOrder(orderId)
+
+            const data = await getOrderByUser({ search, status, page, limit })
+             setOrders(
+                data.orders.map(order => mapOrder(order))
+            )
+
+            toast.success(response.message)
+
+        } catch (error) {
+            console.error(error)
+            toast.error("Error al finalizar el pedido")
+
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const handleRequestChanges = (orderId, message, files) => {
         const trimmed = message.trim();
@@ -322,6 +367,8 @@ const MisPedidos = () => {
                                 onAskRequestChanges={setOrderToRequestChanges}
                                 onUpdateStatus={updateOrderStatus}
                                 onOpenAddDeliverable={setOrderToAddDeliverable}
+                                handleAcceptOrder={handleAcceptOrder}
+                                handleFinalizeOrder={handleFinalizeOrder}
                                 userRole={data.user.role}
                             />
                         ))}
@@ -409,6 +456,8 @@ function OrderCard({
     onAskRequestChanges,
     onUpdateStatus,
     onOpenAddDeliverable,
+    handleAcceptOrder,
+    handleFinalizeOrder,
     userRole
 }) {
     const statusCfg = STATUS_CONFIG[order.status];
@@ -601,11 +650,12 @@ function OrderCard({
                             <button
                                 type="button"
                                 onClick={() =>
-                                onUpdateStatus(
-                                    order.id,
-                                    "in_process",
-                                    "Aceptaste el pedido. El estado ahora es En proceso."
-                                )
+                                // onUpdateStatus(
+                                //     order.id,
+                                //     "in_process",
+                                //     "Aceptaste el pedido. El estado ahora es En proceso."
+                                // )
+                                    handleAcceptOrder(order.id)
                                 }
                                 className="cursor-pointer inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
                             >
@@ -627,11 +677,12 @@ function OrderCard({
                             <button
                                 type="button"
                                 onClick={() =>
-                                onUpdateStatus(
-                                    order.id,
-                                    "delivered",
-                                    "Marcaste el pedido como finalizado. Esperá a que el cliente acepte la entrega."
-                                )
+                                // onUpdateStatus(
+                                //     order.id,
+                                //     "delivered",
+                                //     "Marcaste el pedido como finalizado. Esperá a que el cliente acepte la entrega."
+                                // )
+                                    handleFinalizeOrder(order.id)
                                 }
                                 className="cursor-pointer inline-flex w-full items-center justify-center rounded-full border border-[#28a745] px-4 py-1.5 text-xs font-medium text-[#28a745] transition hover:bg-[#28a74510] md:w-auto"
                             >

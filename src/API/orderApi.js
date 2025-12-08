@@ -43,3 +43,33 @@ export async function getOrderById(id) {
         throw error
     }
 }
+
+export async function acceptOrder(id){
+    try{
+        const url = `order/accept/${id}`
+
+        const { data } = await api.put(url)
+        return data
+
+    }catch(error){
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error || "Error al aceptar el pedido")
+        }
+        throw error
+    }
+}
+
+export async function finalizeOrder(id){
+    try{
+        const url = `order/finalize/${id}`
+
+        const { data } = await api.put(url)
+        return data
+
+    }catch(error){
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error || "Error al finalizar el pedido")
+        }
+        throw error
+    }
+}
