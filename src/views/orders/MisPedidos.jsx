@@ -1,4 +1,8 @@
+import { useEffect } from "react";
 import { useMemo, useState } from "react";
+import { getOrderByUser } from "../../API/orderApi";
+import { Link, useSearchParams } from "react-router";
+import Spinner from "../../components/Spinner";
 
 const STATUS_CONFIG = {
     all: { label: "Todos" },
@@ -24,141 +28,70 @@ const STATUS_CONFIG = {
     },
 };
 
-// TODO: Reemplazar MOCK_ORDERS con datos reales del backend de Josby
-// cuando el endpoint de "mis pedidos" esté disponible.
-const MOCK_ORDERS = [
-    {
-        id: "ORD-0001",
-        serviceTitle: "Diseño de logo minimalista",
-        serviceImage:
-            "https://images.pexels.com/photos/4348403/pexels-photo-4348403.jpeg?auto=compress&cs=tinysrgb&w=600",
-        freelancerName: "Ana Pérez",
-        freelancerAvatar:
-            "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=200",
-        createdAt: "2025-12-01",
-        estimatedDelivery: "2025-12-05",
-        price: 8500,
-        status: "pending",
-        lastUpdate: "Esperando que el freelancer acepte el pedido.",
-        description:
-            "Logo minimalista para emprendimiento de cosmética natural. Incluye 2 propuestas y hasta 3 rondas de ajustes.",
-        deliverables: [
-            {
-                id: "DEL-0001-1",
-                name: "Brief_logo.pdf",
-                type: "Documento",
-                uploadedAt: "2025-12-01",
-                url: "#",
-            },
-            {
-                id: "DEL-0001-2",
-                name: "Propuesta_logo_v1.png",
-                type: "Imagen",
-                uploadedAt: "2025-12-03",
-                url: "#",
-            },
-        ],
-    },
-    {
-        id: "ORD-0002",
-        serviceTitle: "Edición de video para redes sociales",
-        serviceImage:
-            "https://images.pexels.com/photos/6898859/pexels-photo-6898859.jpeg?auto=compress&cs=tinysrgb&w=600",
-        freelancerName: "Lucas Gómez",
-        freelancerAvatar:
-            "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=200",
-        createdAt: "2025-11-28",
-        estimatedDelivery: "2025-12-03",
-        price: 12500,
-        status: "in_process",
-        lastUpdate: "El freelancer está trabajando en tu pedido.",
-        description:
-            "Edición de 5 videos cortos para Instagram y TikTok a partir de material bruto enviado por el cliente.",
-        deliverables: [
-            {
-                id: "DEL-0002-1",
-                name: "Reel_IG_v1.mp4",
-                type: "Video",
-                uploadedAt: "2025-11-30",
-                url: "#",
-            },
-            {
-                id: "DEL-0002-2",
-                name: "Reel_TikTok_v1.mp4",
-                type: "Video",
-                uploadedAt: "2025-12-01",
-                url: "#",
-            },
-        ],
-    },
-    {
-        id: "ORD-0003",
-        serviceTitle: "Redacción de texto para landing page",
-        serviceImage:
-            "https://images.pexels.com/photos/261662/pexels-photo-261662.jpeg?auto=compress&cs=tinysrgb&w=600",
-        freelancerName: "María López",
-        freelancerAvatar:
-            "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200",
-        createdAt: "2025-11-25",
-        estimatedDelivery: "2025-11-29",
-        price: 6000,
-        status: "review",
-        lastUpdate: "Hay un entregable listo para revisar.",
-        description:
-            "Texto persuasivo para una landing de venta de cursos online. Incluye secciones hero, beneficios y FAQ.",
-        deliverables: [
-            {
-                id: "DEL-0003-1",
-                name: "Copy_landing_v1.docx",
-                type: "Documento",
-                uploadedAt: "2025-11-28",
-                url: "#",
-            },
-        ],
-    },
-    {
-        id: "ORD-0004",
-        serviceTitle: "Página web simple para portfolio",
-        serviceImage:
-            "https://images.pexels.com/photos/3861964/pexels-photo-3861964.jpeg?auto=compress&cs=tinysrgb&w=600",
-        freelancerName: "Pedro Silva",
-        freelancerAvatar:
-            "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=200",
-        createdAt: "2025-11-15",
-        estimatedDelivery: "2025-11-22",
-        price: 18000,
-        status: "delivered",
-        lastUpdate: "Trabajo entregado y pago liberado al freelancer.",
-        description:
-            "Desarrollo de un portfolio one-page responsive con sección de proyectos, sobre mí y formulario de contacto.",
-        deliverables: [
-            {
-                id: "DEL-0004-1",
-                name: "Link_sitio_producción.txt",
-                type: "Link",
-                uploadedAt: "2025-11-22",
-                url: "https://google.com",
-            },
-            {
-                id: "DEL-0004-2",
-                name: "Código_fuente.zip",
-                type: "Archivo comprimido",
-                uploadedAt: "2025-11-21",
-                url: "#",
-            },
-        ],
-    },
-];
-
 const MisPedidos = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [statusFilter, setStatusFilter] = useState("all");
     const [search, setSearch] = useState("");
-    const [orders, setOrders] = useState(MOCK_ORDERS);
+    const [orders, setOrders] = useState([]);
+    const [pagination, setPagination] = useState({ page: 1, totalPages: 1, hasMore: false })
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [orderToConfirm, setOrderToConfirm] = useState(null);
-    const [orderToRequestChanges, setOrderToRequestChanges] =
-        useState(null);
+    const [orderToRequestChanges, setOrderToRequestChanges] = useState(null);
+    const [loading, setLoading] = useState(true)
 
+    const mapStatus = (estado) => {
+        switch (estado) {
+            case "pendiente":
+                return "pending"
+            case "proceso":
+                return "in_process"
+            case "revision":
+                return "review"
+            case "finalizado":
+                return "delivered"
+            default:
+                return "pending"
+        }
+    }      
+
+    useEffect(() => {
+        const getOrders = async () => {
+            try{
+                const search = searchParams.get("search") || ""
+                const status = searchParams.get("status") || ""
+                const page = searchParams.get("page") || 1
+                const limit = searchParams.get("limit") || 9
+
+                const data = await getOrderByUser({ search, status, page, limit })
+                console.log(data)
+                setOrders(
+                    data.orders.map(order => ({
+                        id: order._id,
+                        serviceId: order.serviceId._id,
+                        serviceTitle: order.serviceId.title,
+                        serviceImage: order.serviceId.images[0],
+                        freelancerName: `${order.freelancerId.firstname} ${order.freelancerId.lastname}`,
+                        freelancerAvatar: order.freelancerId.image || "",
+                        createdAt: order.createdAt,
+                        estimatedDelivery: order.fechaEntrega,
+                        price: order.precio,
+                        status: mapStatus(order.estado),
+                        lastUpdate: order.lastUpdateInfo || "Sin actualizaciones aún",
+                        deliverables: order.entregables || []
+                    }))
+                )
+                setPagination(data.pagination)
+            }catch(error){
+                console.error("Error cargando pedidos", error)
+            }finally{
+                setLoading(false)
+            }
+        }
+
+        getOrders()
+    }, [])
+
+    
     const filteredOrders = useMemo(() => {
         return orders.filter((order) => {
             const matchStatus =
@@ -172,6 +105,61 @@ const MisPedidos = () => {
             return matchStatus && matchSearch;
         });
     }, [orders, statusFilter, search]);
+
+    if (loading) {
+        return <Spinner />
+    }
+
+    const handlePageChange = async (newPage) => {
+        if (newPage < 1 || newPage > pagination.totalPages) return;
+
+        setLoading(true);
+
+        try {
+            const search = searchParams.get("search") || "";
+            const status = searchParams.get("status") || "";
+            const limit = searchParams.get("limit") || 9;
+
+            setSearchParams({
+                search,
+                status,
+                limit,
+                page: newPage,
+            });
+
+            const data = await getOrderByUser({
+                search,
+                status,
+                page: newPage,
+                limit,
+            });
+
+            setOrders(
+                data.orders.map(order => ({
+                    id: order._id,
+                    serviceId: order.serviceId._id,
+                    serviceTitle: order.serviceId.title,
+                    serviceImage: order.serviceId.images[0],
+                    freelancerName: `${order.freelancerId.firstname} ${order.freelancerId.lastname}`,
+                    freelancerAvatar: order.freelancerId.image || "",
+                    createdAt: order.createdAt,
+                    estimatedDelivery: order.fechaEntrega,
+                    price: order.precio,
+                    status: mapStatus(order.estado),
+                    lastUpdate: order.lastUpdateInfo || "Sin actualizaciones aún",
+                    deliverables: order.entregables || []
+                }))
+            );
+
+            setPagination(data.pagination);
+
+        } catch (error) {
+            console.error("Error cambiando página:", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
 
     const handleAcceptDelivery = (orderId) => {
         setOrders((prev) =>
@@ -215,7 +203,7 @@ const MisPedidos = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#f6ffff]">
+        <div className="min-h-screen">
             <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
                 {/* Header */}
                 <header className="mb-6">
@@ -237,7 +225,7 @@ const MisPedidos = () => {
                                     key={key}
                                     type="button"
                                     onClick={() => setStatusFilter(key)}
-                                    className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${statusFilter === "all"
+                                    className={`rounded-full px-4 py-1.5 text-sm font-medium transition cursor-pointer ${statusFilter === "all"
                                         ? "bg-[#5834b7] text-white shadow-sm"
                                         : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
                                         }`}
@@ -249,7 +237,7 @@ const MisPedidos = () => {
                                     key={key}
                                     type="button"
                                     onClick={() => setStatusFilter(key)}
-                                    className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${statusFilter === key
+                                    className={`rounded-full px-4 py-1.5 text-sm font-medium transition cursor-pointer ${statusFilter === key
                                         ? "bg-[#5834b7] text-white shadow-sm"
                                         : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
                                         }`}
@@ -288,12 +276,16 @@ const MisPedidos = () => {
                             Explora los servicios disponibles en Josby y contratá tu
                             primer freelancer.
                         </p>
-                        <button
-                            type="button"
-                            className="mt-4 inline-flex items-center justify-center rounded-full bg-[#38ced6] px-5 py-2.5 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0]"
+                        <Link
+                            to="/"
                         >
-                            Explorar servicios
-                        </button>
+                            <button
+                                type="button"
+                                className="mt-4 inline-flex items-center justify-center rounded-full bg-[#38ced6] px-5 py-2.5 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] cursor-pointer"
+                            >
+                                Explorar servicios
+                            </button>
+                        </Link>
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -341,7 +333,32 @@ const MisPedidos = () => {
                     }}
                 />
             )}
+
+            {pagination.totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 my-8">
+                  <button
+                    onClick={() => handlePageChange(pagination.page - 1)}
+                    disabled={pagination.page === 1}
+                    className="cursor-pointer px-4 py-2 bg-gray-200 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition-colors"
+                  >
+                    Anterior
+                  </button>
+
+                  <span className="text-gray-600">
+                    Página {pagination.page} de {pagination.totalPages}
+                  </span>
+
+                  <button
+                    onClick={() => handlePageChange(pagination.page + 1)}
+                    disabled={!pagination.hasMore}
+                    className="cursor-pointer px-4 py-2 bg-primary-dark text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-dark/90 transition-colors"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              )}
         </div>
+
     );
 };
 
@@ -388,11 +405,18 @@ function OrderCard({
                 {/* Freelancer + Fechas */}
                 <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-[#718096] sm:text-sm">
                     <div className="flex items-center gap-2">
-                        <img
-                            src={order.freelancerAvatar}
-                            alt={order.freelancerName}
-                            className="h-7 w-7 rounded-full object-cover"
-                        />
+                        {order.freelancerAvatar ? (
+                            <img
+                                src={order.freelancerAvatar}
+                                alt={order.freelancerName}
+                                className="h-7 w-7 rounded-full object-cover"
+                            />
+                        ): (
+                            <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                                {order.freelancerName.charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                        
                         <span className="font-medium text-[#1A202C]">
                             {order.freelancerName}
                         </span>
@@ -439,22 +463,22 @@ function OrderCard({
                     <button
                         type="button"
                         onClick={() => onViewDetails(order)}
-                        className="inline-flex w-full items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9] md:w-auto"
+                        className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9] md:w-auto"
                     >
                         Ver detalles
                     </button>
 
                     {/* Botón Ir al chat */}
-                    <button
-                        type="button"
-                        className="inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] md:w-auto"
-                        onClick={() => {
-                            // TODO: conectar con chat cuando esté integrado
-                            console.log("Ir al chat del pedido:", order.id);
-                        }}
+                    <Link 
+                        to={`/service/${order.serviceId}`}
                     >
-                        Ir al chat
-                    </button>
+                        <button
+                            type="button"
+                            className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] md:w-auto"
+                        >
+                            Ir al chat
+                        </button>
+                    </Link>
 
                     {/* Acciones extra en revisión */}
                     {order.status === "review" && (
@@ -463,7 +487,7 @@ function OrderCard({
                                 <button
                                     type="button"
                                     onClick={() => onAskAccept(order)}
-                                    className="inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
+                                    className="cursor-pointer inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
                                 >
                                     Aceptar entrega
                                 </button>
@@ -471,7 +495,7 @@ function OrderCard({
                                 <button
                                     type="button"
                                     onClick={() => onAskRequestChanges(order)}
-                                    className="inline-flex w-full items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-1.5 text-xs font-medium text-[#718096] transition hover:bg-[#F7FAFC] md:w-auto"
+                                    className="cursor-pointer inline-flex w-full items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-1.5 text-xs font-medium text-[#718096] transition hover:bg-[#F7FAFC] md:w-auto"
                                 >
                                     Solicitar cambios
                                 </button>
@@ -515,7 +539,7 @@ function AcceptDeliveryModal({ order, onConfirm, onClose }) {
                     <button
                         type="button"
                         onClick={onClose}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
+                        className="cursor-pointer inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
                     >
                         ✕
                     </button>
@@ -550,14 +574,14 @@ function AcceptDeliveryModal({ order, onConfirm, onClose }) {
                 <div className="mt-5 flex justify-end gap-3">
                     <button
                         type="button"
-                        className="inline-flex items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-2 text-sm font-medium text-[#718096] hover:bg-[#EDF2F7]"
+                        className="cursor-pointer inline-flex items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-2 text-sm font-medium text-[#718096] hover:bg-[#EDF2F7]"
                         onClick={onClose}
                     >
                         No, volver
                     </button>
                     <button
                         type="button"
-                        className="inline-flex items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9]"
+                        className="cursor-pointer inline-flex items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9]"
                         onClick={() => onConfirm(order.id)}
                     >
                         Sí, aceptar entrega
@@ -613,7 +637,7 @@ function RequestChangesModal({ order, onSubmit, onClose }) {
                     <button
                         type="button"
                         onClick={onClose}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
+                        className="cursor-pointer inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
                     >
                         ✕
                     </button>
@@ -645,7 +669,7 @@ function RequestChangesModal({ order, onSubmit, onClose }) {
                     <input
                         type="file"
                         multiple
-                        className="block w-full text-xs text-[#718096] file:mr-2 file:rounded-full file:border-0 file:bg-[#E2E8F0] file:px-3 file:py-1 file:text-xs file:font-medium file:text-[#1A202C] hover:file:bg-[#CBD5E0]"
+                        className="cursor-pointer block w-full text-xs text-[#718096] file:mr-2 file:rounded-full file:border-0 file:bg-[#E2E8F0] file:px-3 file:py-1 file:text-xs file:font-medium file:text-[#1A202C] hover:file:bg-[#CBD5E0]"
                         onChange={handleFilesChange}
                     />
                     {files.length > 0 && (
@@ -662,14 +686,14 @@ function RequestChangesModal({ order, onSubmit, onClose }) {
                 <div className="mt-5 flex justify-end gap-3">
                     <button
                         type="button"
-                        className="inline-flex items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-2 text-sm font-medium text-[#718096] hover:bg-[#EDF2F7]"
+                        className="cursor-pointer inline-flex items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-2 text-sm font-medium text-[#718096] hover:bg-[#EDF2F7]"
                         onClick={onClose}
                     >
                         Cancelar
                     </button>
                     <button
                         type="button"
-                        className="inline-flex items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9]"
+                        className="cursor-pointer inline-flex items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9]"
                         onClick={handleSend}
                     >
                         Enviar solicitud
@@ -715,7 +739,7 @@ function OrderDetailModal({ order, onClose }) {
                     <button
                         type="button"
                         onClick={onClose}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
+                        className="cursor-pointer inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
                     >
                         ✕
                     </button>
@@ -828,7 +852,7 @@ function OrderDetailModal({ order, onClose }) {
 
                                             <button
                                                 type="button"
-                                                className="ml-3 inline-flex items-center justify-center rounded-full border border-[#E2E8F0] px-3 py-1 text-xs font-medium text-[#5834b7] hover:bg-[#F7FAFC]"
+                                                className="cursor-pointer ml-3 inline-flex items-center justify-center rounded-full border border-[#E2E8F0] px-3 py-1 text-xs font-medium text-[#5834b7] hover:bg-[#F7FAFC]"
                                                 onClick={() => {
                                                     if (file.url && file.url !== "#") {
                                                         window.open(
@@ -884,7 +908,7 @@ function OrderDetailModal({ order, onClose }) {
                     <section className="flex flex-col gap-2 sm:flex-row sm:justify-end">
                         <button
                             type="button"
-                            className="inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] sm:w-auto"
+                            className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] sm:w-auto"
                         >
                             Ir al chat
                         </button>
@@ -892,7 +916,7 @@ function OrderDetailModal({ order, onClose }) {
                         <button
                             type="button"
                             onClick={() => setShowDeliverables((prev) => !prev)}
-                            className="inline-flex w-full items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9] sm:w-auto"
+                            className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9] sm:w-auto"
                         >
                             {showDeliverables
                                 ? "Ocultar entregables"

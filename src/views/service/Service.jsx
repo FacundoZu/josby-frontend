@@ -27,8 +27,7 @@ const Service = () => {
     async function getService(){
       try {
         if(id){
-          // const data = await getServiceById(id)
-          const data = await getServiceById("6921cbf4b391f426bcd87156")
+          const data = await getServiceById(id)
           setService(data)
         }
 

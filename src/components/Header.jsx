@@ -133,7 +133,7 @@ const Header = () => {
                 {isFreelancer ? (
                   <NavLink
                     onClick={() => setIsMenuOpen(false)}
-                    to="/" 
+                    to="/mis-pedidos" 
                     className="hover:text-hover-cyan transition-colors"
                   >
                     Mis pedidos
@@ -168,7 +168,7 @@ const Header = () => {
                   ) : (
                     <NavLink
                       onClick={() => setIsMenuOpen(false)}
-                      to="/"
+                      to="/mis-pedidos"
                       className="bg-primary hover:bg-hover-cyan text-white border border-gray-200 px-4 py-2 rounded-md"
                     >
                       Mis pedidos
@@ -226,7 +226,7 @@ const Header = () => {
 
           {isFreelancer ? (
             <NavLink
-              to="/"
+              to="/mis-pedidos"
               className="bg-primary hover:bg-hover-cyan text-white border border-gray-200 px-4 py-2 rounded-md"
             >
               Mis pedidos
@@ -254,7 +254,7 @@ const Header = () => {
               </NavLink>
             ) : (
               <NavLink
-                to="/"
+                to="/mis-pedidos"
                 className="bg-primary hover:bg-hover-cyan text-white border border-gray-200 px-4 py-2 rounded-md"
               >
                 Mis pedidos

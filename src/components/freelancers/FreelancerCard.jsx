@@ -8,7 +8,7 @@ export default function FreelancerCard({ data }) {
                     <img
                         src={data.image}
                         alt={data.firstname}
-                        className="w-14 h-14 rounded-full object-cover"
+                        className="w-10 h-10 rounded-full object-cover"
                     />
                 ): (
                     <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
