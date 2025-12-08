@@ -9,6 +9,8 @@ import Service from "./views/service/Service";
 import ChatFreelancer from "./views/chat/ChatFreelancer";
 import GlobalSocketListener from "./listeners/GlobalSocketListener";
 import FormServices from "./views/formServices";
+import MisPedidos from "./views/orders/MisPedidos";
+import MisPedidosFreelancer from "./views/orders/MisPedidosFreelancer";
 
 
 export default function router() {
@@ -23,7 +25,8 @@ export default function router() {
                     <Route path="/service/:id" element={<Service />} />
                     <Route path="/service" element={<FormServices />} />
                     <Route path="/chat" element={<ChatFreelancer />} />
-
+                    <Route path="mis-pedidos" element={<MisPedidos />} />
+                    <Route path="/mis-pedidos-freelancer" element={<MisPedidosFreelancer />} />
                 </Route>
 
                 <Route path="/login" element={<Login />} />
@@ -36,4 +39,4 @@ export default function router() {
             />
         </BrowserRouter>
     )
-}
+
