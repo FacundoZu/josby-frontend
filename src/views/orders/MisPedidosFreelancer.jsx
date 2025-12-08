@@ -6,20 +6,19 @@ import Toast from "../../components/feedback/Toast.jsx";
 
 /**
  * @typedef {Object} Deliverable
- * @property {string} id          ID interno del entregable
- * @property {string} name        Nombre del archivo o recurso
- * @property {string} type        Tipo (Documento, Imagen, Video, Link...)
- * @property {string} uploadedAt  Fecha de subida en formato ISO (YYYY-MM-DD)
- * @property {string} url         URL de acceso al entregable
+ * @property {string} id
+ * @property {string} name
+ * @property {string} type
+ * @property {string} uploadedAt
+ * @property {string} url
  */
 
 /**
- * @typedef {Object} Order
+ * @typedef {Object} FreelancerOrder
  * @property {string} id
  * @property {string} serviceTitle
  * @property {string} serviceImage
- * @property {string} freelancerName
- * @property {string} freelancerAvatar
+ * @property {string} clientName
  * @property {string} createdAt
  * @property {string} estimatedDelivery
  * @property {number} price
@@ -29,87 +28,51 @@ import Toast from "../../components/feedback/Toast.jsx";
  * @property {Deliverable[]} deliverables
  */
 
-/** @type {Order[]} */
-// TODO: Reemplazar MOCK_ORDERS con datos reales del backend de Josby
-// cuando el endpoint de "mis pedidos" esté disponible.
-const MOCK_ORDERS = [
+/** @type {FreelancerOrder[]} */
+// Datos mock pensados desde el lado del FREELANCER
+const MOCK_FREELANCER_ORDERS = [
   {
     id: "ORD-0001",
     serviceTitle: "Diseño de logo minimalista",
     serviceImage:
       "https://images.pexels.com/photos/4348403/pexels-photo-4348403.jpeg?auto=compress&cs=tinysrgb&w=600",
-    freelancerName: "Ana Pérez",
-    freelancerAvatar:
-      "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=200",
+    clientName: "Cosmética Natural Alma",
     createdAt: "2025-12-01",
     estimatedDelivery: "2025-12-05",
     price: 8500,
     status: "pending",
-    lastUpdate: "Esperando que el freelancer acepte el pedido.",
+    lastUpdate: "El cliente envió el pedido. Aún no lo aceptaste.",
     description:
       "Logo minimalista para emprendimiento de cosmética natural. Incluye 2 propuestas y hasta 3 rondas de ajustes.",
-    deliverables: [
-      {
-        id: "DEL-0001-1",
-        name: "Brief_logo.pdf",
-        type: "Documento",
-        uploadedAt: "2025-12-01",
-        url: "#",
-      },
-      {
-        id: "DEL-0001-2",
-        name: "Propuesta_logo_v1.png",
-        type: "Imagen",
-        uploadedAt: "2025-12-03",
-        url: "#",
-      },
-    ],
+    deliverables: [],
   },
   {
     id: "ORD-0002",
     serviceTitle: "Edición de video para redes sociales",
     serviceImage:
       "https://images.pexels.com/photos/6898859/pexels-photo-6898859.jpeg?auto=compress&cs=tinysrgb&w=600",
-    freelancerName: "Lucas Gómez",
-    freelancerAvatar:
-      "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=200",
+    clientName: "Emprendimiento FitVibes",
     createdAt: "2025-11-28",
     estimatedDelivery: "2025-12-03",
     price: 12500,
     status: "in_process",
-    lastUpdate: "El freelancer está trabajando en tu pedido.",
+    lastUpdate: "Estás trabajando en el material enviado por el cliente.",
     description:
       "Edición de 5 videos cortos para Instagram y TikTok a partir de material bruto enviado por el cliente.",
-    deliverables: [
-      {
-        id: "DEL-0002-1",
-        name: "Reel_IG_v1.mp4",
-        type: "Video",
-        uploadedAt: "2025-11-30",
-        url: "#",
-      },
-      {
-        id: "DEL-0002-2",
-        name: "Reel_TikTok_v1.mp4",
-        type: "Video",
-        uploadedAt: "2025-12-01",
-        url: "#",
-      },
-    ],
+    deliverables: [],
   },
   {
     id: "ORD-0003",
     serviceTitle: "Redacción de texto para landing page",
     serviceImage:
       "https://images.pexels.com/photos/261662/pexels-photo-261662.jpeg?auto=compress&cs=tinysrgb&w=600",
-    freelancerName: "María López",
-    freelancerAvatar:
-      "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200",
+    clientName: "Plataforma de cursos online",
     createdAt: "2025-11-25",
     estimatedDelivery: "2025-11-29",
     price: 6000,
     status: "review",
-    lastUpdate: "Hay un entregable listo para revisar.",
+    lastUpdate:
+      "Subiste un entregable y está esperando revisión del cliente.",
     description:
       "Texto persuasivo para una landing de venta de cursos online. Incluye secciones hero, beneficios y FAQ.",
     deliverables: [
@@ -127,14 +90,13 @@ const MOCK_ORDERS = [
     serviceTitle: "Página web simple para portfolio",
     serviceImage:
       "https://images.pexels.com/photos/3861964/pexels-photo-3861964.jpeg?auto=compress&cs=tinysrgb&w=600",
-    freelancerName: "Pedro Silva",
-    freelancerAvatar:
-      "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=200",
+    clientName: "Ilustradora freelance",
     createdAt: "2025-11-15",
     estimatedDelivery: "2025-11-22",
     price: 18000,
     status: "delivered",
-    lastUpdate: "Trabajo entregado y pago liberado al freelancer.",
+    lastUpdate:
+      "Pedido finalizado. El cliente aceptó la entrega y el pago fue liberado.",
     description:
       "Desarrollo de un portfolio one-page responsive con sección de proyectos, sobre mí y formulario de contacto.",
     deliverables: [
@@ -156,28 +118,27 @@ const MOCK_ORDERS = [
   },
 ];
 
-function getNextStepForClient(status) {
+function getNextStepForFreelancer(status) {
   switch (status) {
     case "pending":
-      return "Esperá que el freelancer acepte tu pedido. Si pasan varios días, podés escribirle por el chat para asegurarte de que vio la solicitud.";
+      return "Revisá los detalles del pedido y aceptalo para empezar a trabajar. Si no podés tomarlo, más adelante vas a poder rechazarlo desde esta misma pantalla.";
     case "in_process":
-      return "El freelancer está trabajando en tu pedido. Podés seguir el avance desde el chat y compartir más detalles o archivos si los necesita.";
+      return "Trabajá en el pedido y subí uno o varios entregables para pasarlo a revisión del cliente.";
     case "review":
-      return "Revisá los entregables y, si estás conforme, aceptá la entrega. Si necesitás ajustes, usá el botón “Solicitar cambios”.";
+      return "Esperá la revisión del cliente. Si te pide cambios, respondé por el chat y subí una nueva versión del entregable.";
     case "delivered":
-      return "El pedido está finalizado. Más adelante vas a poder dejar una reseña al freelancer desde esta pantalla.";
+      return "El pedido está finalizado. Podés revisar el historial y usar este trabajo como referencia para tu portfolio.";
     default:
       return null;
   }
 }
 
-const MisPedidos = () => {
+const MisPedidosFreelancer = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
-  const [orders, setOrders] = useState(MOCK_ORDERS);
+  const [orders, setOrders] = useState(MOCK_FREELANCER_ORDERS);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [orderToConfirm, setOrderToConfirm] = useState(null);
-  const [orderToRequestChanges, setOrderToRequestChanges] = useState(null);
+  const [orderToAddDeliverable, setOrderToAddDeliverable] = useState(null);
   const [toast, setToast] = useState(null);
 
   const showToast = (message, type = "info") => {
@@ -192,61 +153,57 @@ const MisPedidos = () => {
       const matchSearch =
         search.trim().length === 0 ||
         order.serviceTitle.toLowerCase().includes(search.toLowerCase()) ||
-        order.freelancerName.toLowerCase().includes(search.toLowerCase());
+        order.clientName.toLowerCase().includes(search.toLowerCase());
 
       return matchStatus && matchSearch;
     });
   }, [orders, statusFilter, search]);
 
-  const handleAcceptDelivery = (orderId) => {
-    // TODO: cuando esté el backend, reemplazar esta actualización local
-    // por una llamada a la API, por ejemplo:
-    // await api.patch(`/orders/${orderId}`, { status: "delivered" });
-    // y refrescar el listado con la respuesta real.
+  const updateOrderStatus = (orderId, newStatus, updateText) => {
+    // TODO: cuando esté el backend, esta función debería:
+    // 1) Enviar el nuevo estado al endpoint de pedidos del freelancer:
+    //    api.patch(`/freelancer/orders/${orderId}`, { status: newStatus })
+    // 2) Esperar la respuesta y actualizar el listado según los datos reales
+    //    o volver a pedir todos los pedidos del freelancer.
     setOrders((prev) =>
       prev.map((order) =>
         order.id === orderId
           ? {
             ...order,
-            status: "delivered",
-            lastUpdate:
-              "Entrega aceptada. El pago fue liberado al freelancer.",
+            status: newStatus,
+            lastUpdate: updateText ?? order.lastUpdate,
           }
           : order
       )
     );
   };
 
-  const handleRequestChanges = (orderId, message, files) => {
-    const trimmed = message.trim();
-    if (!trimmed) return;
-
+  // Ahora acepta UNO o VARIOS entregables nuevos
+  const handleAddDeliverable = (orderId, newDeliverableOrList) => {
     // TODO: cuando esté el backend, este handler debería:
-    // 1) Enviar el mensaje y los archivos adjuntos al endpoint de "solicitar cambios"
-    //    por ejemplo: api.post(`/orders/${orderId}/request-changes`, { message, files })
-    // 2) Registrar también el mensaje en el chat del pedido.
-    // 3) Actualizar el estado del pedido según lo que devuelva el backend.
-
+    // 1) Subir los archivos reales al servidor (o a un storage tipo S3) y obtener las URLs.
+    // 2) Enviar los datos del entregable al endpoint:
+    //    api.post(`/freelancer/orders/${orderId}/deliverables`, payload)
+    // 3) Actualizar el estado local con la respuesta del backend
+    //    o refrescar el pedido desde la API.
     setOrders((prev) =>
       prev.map((order) =>
         order.id === orderId
           ? {
             ...order,
-            status: "in_process",
-            lastUpdate: `Solicitaste cambios: "${trimmed}"`,
+            deliverables: [
+              ...(order.deliverables || []),
+              ...(Array.isArray(newDeliverableOrList)
+                ? newDeliverableOrList
+                : [newDeliverableOrList]),
+            ],
+            status: "review",
+            lastUpdate:
+              "Subiste un nuevo entregable. El cliente puede revisarlo.",
           }
           : order
       )
     );
-
-    console.log("Solicitud de cambios para", orderId, "=>", trimmed);
-
-    if (files && files.length > 0) {
-      console.log(
-        "Archivos adjuntos:",
-        files.map((f) => f.name)
-      );
-    }
   };
 
   return (
@@ -256,24 +213,21 @@ const MisPedidos = () => {
         <header className="mb-6">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold text-[#1A202C] sm:text-3xl">
-              Mis pedidos
+              Mis pedidos como freelancer
             </h1>
 
-            {/* Chip de rol: Cliente */}
-            <span className="inline-flex items-center rounded-full bg-[#EBF8FF] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#2B6CB0]">
-              Cliente
+            {/* Chip de rol: Freelancer */}
+            <span className="inline-flex items-center rounded-full bg-[#F5F3FF] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#553C9A]">
+              Freelancer
             </span>
           </div>
 
           <p className="mt-1 text-sm text-[#718096] sm:text-base">
-            Estás viendo los pedidos de los servicios que contrataste en Josby.
+            Estás viendo los pedidos que te hicieron tus clientes en Josby.
           </p>
           <p className="mt-0.5 text-xs text-[#A0AEC0] sm:text-sm">
-            Si también trabajás como freelancer, vas a encontrar tus pedidos como
-            proveedor en la sección{" "}
-            <span className="font-semibold text-[#5834b7]">
-              “Mis pedidos como freelancer”.
-            </span>
+            Si contrataste servicios de otros freelancers, podés gestionarlos desde{" "}
+            <span className="font-semibold text-[#5834b7]">“Mis pedidos”.</span>
           </p>
         </header>
 
@@ -319,7 +273,7 @@ const MisPedidos = () => {
               <input
                 id="search-orders"
                 type="text"
-                placeholder="Buscar por servicio o freelancer..."
+                placeholder="Buscar por servicio o cliente..."
                 className="w-full rounded-full border border-[#E2E8F0] bg-white px-4 py-2 text-sm text-[#1A202C] placeholder:text-[#d4d4d4] shadow-sm focus:border-[#5834b7] focus:outline-none focus:ring-2 focus:ring-[#5834b733]"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -337,15 +291,9 @@ const MisPedidos = () => {
                   Todavía no tenés pedidos.
                 </p>
                 <p className="mt-2 text-sm text-[#718096]">
-                  Explora los servicios disponibles en Josby y contratá tu
-                  primer freelancer.
+                  Cuando un cliente contrate uno de tus servicios, lo vas a
+                  ver acá.
                 </p>
-                <button
-                  type="button"
-                  className="mt-4 inline-flex items-center justify-center rounded-full bg-[#38ced6] px-5 py-2.5 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0]"
-                >
-                  Explorar servicios
-                </button>
               </>
             ) : (
               <>
@@ -373,12 +321,12 @@ const MisPedidos = () => {
         ) : (
           <div className="space-y-4">
             {filteredOrders.map((order) => (
-              <OrderCard
+              <FreelancerOrderCard
                 key={order.id}
                 order={order}
                 onViewDetails={setSelectedOrder}
-                onAskAccept={setOrderToConfirm}
-                onAskRequestChanges={setOrderToRequestChanges}
+                onUpdateStatus={updateOrderStatus}
+                onOpenAddDeliverable={setOrderToAddDeliverable}
                 onShowToast={showToast}
               />
             ))}
@@ -388,38 +336,25 @@ const MisPedidos = () => {
 
       {/* Modal de detalles */}
       {selectedOrder && (
-        <OrderDetailModal
+        <FreelancerOrderDetailModal
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
         />
       )}
 
-      {/* Modal de confirmación de aceptación */}
-      {orderToConfirm && (
-        <AcceptDeliveryModal
-          order={orderToConfirm}
-          onClose={() => setOrderToConfirm(null)}
-          onConfirm={(id) => {
-            handleAcceptDelivery(id);
-            setOrderToConfirm(null);
-            showToast("Entrega aceptada. El pago será liberado al freelancer.", "success");
+      {/* Modal para agregar entregable */}
+      {orderToAddDeliverable && (
+        <AddDeliverableModal
+          order={orderToAddDeliverable}
+          onClose={() => setOrderToAddDeliverable(null)}
+          onSubmit={(id, newDeliverables) => {
+            handleAddDeliverable(id, newDeliverables);
+            setOrderToAddDeliverable(null);
+            showToast("Entregable(s) subido(s). El pedido pasó a revisión.", "success");
           }}
         />
       )}
 
-      {/* Modal de solicitud de cambios */}
-      {orderToRequestChanges && (
-        <RequestChangesModal
-          order={orderToRequestChanges}
-          onClose={() => setOrderToRequestChanges(null)}
-          onSubmit={(id, message, files) => {
-            handleRequestChanges(id, message, files);
-            setOrderToRequestChanges(null);
-            showToast("Solicitud de cambios enviada al freelancer.", "info");
-          }}
-        />
-      )}
-      
       {toast && (
         <Toast
           message={toast.message}
@@ -431,15 +366,20 @@ const MisPedidos = () => {
   );
 };
 
-function OrderCard({
+function FreelancerOrderCard({
   order,
   onViewDetails,
-  onAskAccept,
-  onAskRequestChanges,
+  onUpdateStatus,
+  onOpenAddDeliverable,
   onShowToast,
+
 }) {
   const statusCfg = ORDER_STATUS_CONFIG[order.status];
-  const nextStep = getNextStepForClient(order.status);
+
+  const canAccept = order.status === "pending";
+  const canMarkInReview = order.status === "in_process";
+  const canMarkDelivered = order.status === "review";
+  const nextStep = getNextStepForFreelancer(order.status);
 
   return (
     <article className="flex flex-col gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm transition hover:shadow-md md:flex-row md:items-stretch">
@@ -462,6 +402,12 @@ function OrderCard({
             <p className="mt-1 text-xs text-[#718096] sm:text-sm">
               ID de pedido: {order.id}
             </p>
+            <p className="mt-1 text-xs text-[#718096] sm:text-sm">
+              Cliente:{" "}
+              <span className="font-medium text-[#1A202C]">
+                {order.clientName}
+              </span>
+            </p>
           </div>
 
           {/* Estado */}
@@ -473,21 +419,8 @@ function OrderCard({
           </span>
         </div>
 
-        {/* Freelancer + Fechas */}
+        {/* Fechas */}
         <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-[#718096] sm:text-sm">
-          <div className="flex items-center gap-2">
-            <img
-              src={order.freelancerAvatar}
-              alt={order.freelancerName}
-              className="h-7 w-7 rounded-full object-cover"
-            />
-            <span className="font-medium text-[#1A202C]">
-              {order.freelancerName}
-            </span>
-          </div>
-
-          <span className="hidden h-1 w-1 rounded-full bg-[#E2E8F0] sm:inline-block" />
-
           <span>
             Pedido:{" "}
             <span className="font-medium text-[#1A202C]">
@@ -517,6 +450,7 @@ function OrderCard({
           </p>
         )}
       </div>
+
       {/* Precio y acciones */}
       <div className="flex flex-col justify-between gap-3 border-t border-[#E2E8F0] pt-3 md:w-64 md:border-l md:border-t-0 md:pl-4 md:pt-0">
         {/* Precio */}
@@ -527,68 +461,154 @@ function OrderCard({
           </span>
         </div>
 
-        {/* Botones principales + acciones extra */}
+        {/* Botones */}
         <div className="flex flex-col gap-2 md:items-end">
-          {/* Botón Ver detalles */}
           <button
             type="button"
             onClick={() => onViewDetails(order)}
-            aria-label={`Ver detalles del pedido ${order.id}`}
+            aria-label={`Ver detalles del pedido ${order.id} como freelancer`}
             className="inline-flex w-full items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9] md:w-auto"
           >
             Ver detalles
           </button>
 
-          {/* Botón Ir al chat */}
           <button
             type="button"
             className="inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] md:w-auto"
-            aria-label={`Ir al chat del pedido ${order.id}`}
+            aria-label={`Ir al chat del pedido ${order.id} como freelancer`}
             onClick={() => {
               // TODO: cuando el módulo de chat esté listo,
-              // navegar a la vista de chat del pedido, por ejemplo:
-              // navigate(`/mis-pedidos/${order.id}/chat`);
-              console.log("Ir al chat del pedido:", order.id);
+              // navegar a la vista de chat del pedido como freelancer, por ejemplo:
+              // navigate(`/freelancer/mis-pedidos/${order.id}/chat`);
+              console.log("Ir al chat del pedido (freelancer):", order.id);
               if (onShowToast) {
-                onShowToast("La vista de chat estará disponible en una próxima versión de Josby.", "info");
+                onShowToast("La vista de chat para freelancers llegará en próximas versiones.", "info");
               }
             }}
           >
             Ir al chat
           </button>
 
-          {/* Acciones extra en revisión */}
-          {order.status === "review" && (
-            <div className="flex w-full flex-col gap-2 pt-1 md:items-end">
-              <div className="flex flex-col gap-2 md:flex-row md:justify-end md:w-full">
-                <button
-                  type="button"
-                  onClick={() => onAskAccept(order)}
-                  aria-label={`Aceptar entrega del pedido ${order.id}`}
-                  className="inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
-                >
-                  Aceptar entrega
-                </button>
+          {/* Acciones según estado */}
+          <div className="mt-1 flex w-full flex-col gap-2 md:items-end">
+            {canAccept && (
+              <button
+                type="button"
+                onClick={() => {
+                  onUpdateStatus(
+                    order.id,
+                    "in_process",
+                    "Aceptaste el pedido. El estado ahora es En proceso."
+                  );
+                  if (onShowToast) {
+                    onShowToast("Aceptaste el pedido. Ahora está en proceso.", "success");
+                  }
+                }}
+                aria-label={`Aceptar pedido ${order.id}`}
+                className="inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
+              >
+                Aceptar pedido
+              </button>
+            )}
 
-                <button
-                  type="button"
-                  onClick={() => onAskRequestChanges(order)}
-                  aria-label={`Solicitar cambios del pedido ${order.id}`}
-                  className="inline-flex w-full items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-1.5 text-xs font-medium text-[#718096] transition hover:bg-[#F7FAFC] md:w-auto"
-                >
-                  Solicitar cambios
-                </button>
-              </div>
-            </div>
-          )}
+            {canMarkInReview && (
+              <button
+                type="button"
+                onClick={() => onOpenAddDeliverable(order)}
+                aria-label={`Subir entregable para el pedido ${order.id}`}
+                className="inline-flex w-full items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-1.5 text-xs font-medium text-[#718096] transition hover:bg-[#F7FAFC] md:w-auto"
+              >
+                Subir entregable / pasar a revisión
+              </button>
+            )}
+
+            {canMarkDelivered && (
+              <button
+                type="button"
+                onClick={() => {
+                  onUpdateStatus(
+                    order.id,
+                    "delivered",
+                    "Marcaste el pedido como finalizado. Esperá a que el cliente acepte la entrega."
+                  );
+                  if (onShowToast) {
+                    onShowToast(
+                      "Marcaste el pedido como finalizado. El cliente debe aceptar la entrega.",
+                      "info"
+                    );
+                  }
+                }}
+                aria-label={`Marcar como finalizado el pedido ${order.id}`}
+                className="inline-flex w-full items-center justify-center rounded-full border border-[#28a745] px-4 py-1.5 text-xs font-medium text-[#28a745] transition hover:bg-[#28a74510] md:w-auto"
+              >
+                Marcar como finalizado
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </article>
   );
 }
 
-function AcceptDeliveryModal({ order, onConfirm, onClose }) {
+function AddDeliverableModal({ order, onSubmit, onClose }) {
+  const [name, setName] = useState("");
+  const [type, setType] = useState("Link");
+  const [url, setUrl] = useState("");
+  const [files, setFiles] = useState([]);
   const closeButtonRef = useRef(null);
+
+  const handleFilesChange = (e) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    setFiles(selectedFiles);
+  };
+
+  const handleSave = () => {
+    const trimmedName = name.trim();
+    const trimmedType = type.trim();
+    const trimmedUrl = url.trim();
+
+    // Si no hay archivos y tampoco nombre para el link, no hacemos nada
+    if (files.length === 0 && !trimmedName) {
+      return;
+    }
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    /** @type {Deliverable[]} */
+    let deliverablesToAdd = [];
+
+    if (files.length > 0) {
+      // Creamos un entregable por archivo
+      deliverablesToAdd = files.map((file) => ({
+        id: `DEL-${order.id}-${file.name}-${Date.now()}`,
+        name: file.name,
+        type: "Archivo",
+        uploadedAt: todayStr,
+        url: "#", // En la versión real, esto sería la URL devuelta por el backend
+      }));
+
+      console.log(
+        "Archivos agregados como entregables para",
+        order.id,
+        files.map((f) => f.name)
+      );
+    } else {
+      // Modo "solo link"
+      deliverablesToAdd = [
+        {
+          id: `DEL-${order.id}-${Date.now()}`,
+          name: trimmedName,
+          type: trimmedType || "Link",
+          uploadedAt: todayStr,
+          url: trimmedUrl || "#",
+        },
+      ];
+    }
+
+    // 👉 Siempre mandamos un ARRAY de entregables al padre
+    onSubmit(order.id, deliverablesToAdd);
+  };
 
   // Cerrar con Esc
   useEffect(() => {
@@ -612,140 +632,22 @@ function AcceptDeliveryModal({ order, onConfirm, onClose }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6"
-      onClick={onClose} // click en el fondo cierra
-    >
-      <div
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="accept-delivery-title"
-        onClick={(e) => e.stopPropagation()} // evita que el click adentro cierre
-      >
-        <div className="mb-3 flex items-start justify-between gap-4">
-          <div>
-            <h2
-              id="accept-delivery-title"
-              className="text-lg font-semibold text-[#1A202C]"
-            >
-              Confirmar aceptación de entrega
-            </h2>
-            <p className="mt-1 text-sm text-[#718096]">
-              Pedido{" "}
-              <span className="font-medium text-[#1A202C]">
-                {order.id}
-              </span>
-            </p>
-          </div>
-          <button
-            type="button"
-            ref={closeButtonRef}
-            onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
-          >
-            ✕
-          </button>
-        </div>
-
-        <p className="text-sm text-[#4A5568]">
-          Al aceptar la entrega, el pedido se dará por{" "}
-          <span className="font-semibold">finalizado</span> y el pago
-          será liberado al freelancer. Si todavía necesitás ajustar
-          algo, te conviene primero{" "}
-          <span className="font-semibold">solicitar cambios</span>.
-        </p>
-
-        <div className="mt-4 rounded-2xl bg-[#F7FAFC] p-3 text-sm">
-          <p className="font-semibold text-[#1A202C]">
-            {order.serviceTitle}
-          </p>
-          <p className="mt-1 text-xs text-[#718096]">
-            Freelancer:{" "}
-            <span className="font-medium text-[#1A202C]">
-              {order.freelancerName}
-            </span>
-          </p>
-          <p className="mt-1 text-xs text-[#718096]">
-            Total:{" "}
-            <span className="font-semibold text-[#1A202C]">
-              AR$ {formatPriceArs(order.price)}
-            </span>
-          </p>
-        </div>
-
-        <div className="mt-5 flex justify-end gap-3">
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-2 text-sm font-medium text-[#718096] hover:bg-[#EDF2F7]"
-            onClick={onClose}
-          >
-            No, volver
-          </button>
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9]"
-            onClick={() => onConfirm(order.id)}
-          >
-            Sí, aceptar entrega
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RequestChangesModal({ order, onSubmit, onClose }) {
-  const [message, setMessage] = useState("");
-  const [files, setFiles] = useState([]);
-  const closeButtonRef = useRef(null);
-
-  const handleFilesChange = (e) => {
-    const filesArray = Array.from(e.target.files || []);
-    setFiles(filesArray);
-  };
-
-  const handleSend = () => {
-    if (!message.trim()) return;
-    onSubmit(order.id, message, files);
-  };
-
-  // Cerrar con Esc
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
-
-  // Enfocar botón cerrar al abrir
-  useEffect(() => {
-    if (closeButtonRef.current) {
-      closeButtonRef.current.focus();
-    }
-  }, []);
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6"
       onClick={onClose}
     >
       <div
         className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="request-changes-title"
+        aria-labelledby="add-deliverable-title"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-start justify-between gap-4">
           <div>
             <h2
-              id="request-changes-title"
+              id="add-deliverable-title"
               className="text-lg font-semibold text-[#1A202C]"
             >
-              Solicitar cambios
+              Agregar entregable
             </h2>
             <p className="mt-1 text-sm text-[#718096]">
               Pedido{" "}
@@ -753,55 +655,84 @@ function RequestChangesModal({ order, onSubmit, onClose }) {
                 {order.id}
               </span>
             </p>
+            <p className="mt-1 text-xs text-[#A0AEC0]">
+              Podés subir archivos o compartir un link. En una versión
+              conectada, estos archivos se enviarían al backend.
+            </p>
           </div>
           <button
             type="button"
             ref={closeButtonRef}
             onClick={onClose}
+            aria-label="Cerrar modal de agregar entregable"
             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
           >
             ✕
           </button>
         </div>
 
-        <p className="text-sm text-[#4A5568]">
-          Contale al freelancer qué te gustaría ajustar. Podés incluir
-          referencias, detalles específicos o adjuntar archivos de
-          ejemplo.
-        </p>
+        <div className="space-y-4">
+          {/* Subir archivos */}
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-[#4A5568]">
+              Subir archivos (opcional)
+            </label>
+            <input
+              type="file"
+              multiple
+              className="block w-full text-xs text-[#718096] file:mr-2 file:rounded-full file:border-0 file:bg-[#E2E8F0] file:px-3 file:py-1 file:text-xs file:font-medium file:text-[#1A202C] hover:file:bg-[#CBD5E0]"
+              onChange={handleFilesChange}
+            />
+            {files.length > 0 && (
+              <ul className="mt-2 space-y-1 text-xs text-[#4A5568]">
+                {files.map((file) => (
+                  <li key={file.name} className="truncate">
+                    • {file.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-        <div className="mt-3">
-          <label className="mb-1 block text-xs font-semibold text-[#4A5568]">
-            Detalles de los cambios
-          </label>
-          <textarea
-            className="w-full resize-none rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#1A202C] placeholder:text-[#A0AEC0] focus:border-[#5834b7] focus:outline-none focus:ring-1 focus:ring-[#5834b733]"
-            rows={4}
-            placeholder="Ejemplo: Me gustaría que el tono del texto sea más informal y que el botón principal tenga otro color..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-        </div>
+          {/* Datos de link / referencia */}
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-[#4A5568]">
+              Nombre del entregable (para link)
+            </label>
+            <input
+              type="text"
+              className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm text-[#1A202C] placeholder:text-[#A0AEC0] focus:border-[#5834b7] focus:outline-none focus:ring-1 focus:ring-[#5834b733]"
+              placeholder="Ej: Link a sitio en producción"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
 
-        <div className="mt-3">
-          <label className="mb-1 block text-xs font-semibold text-[#4A5568]">
-            Adjuntar archivos (opcional)
-          </label>
-          <input
-            type="file"
-            multiple
-            className="block w-full text-xs text-[#718096] file:mr-2 file:rounded-full file:border-0 file:bg-[#E2E8F0] file:px-3 file:py-1 file:text-xs file:font-medium file:text-[#1A202C] hover:file:bg-[#CBD5E0]"
-            onChange={handleFilesChange}
-          />
-          {files.length > 0 && (
-            <ul className="mt-2 space-y-1 text-xs text-[#4A5568]">
-              {files.map((file) => (
-                <li key={file.name} className="truncate">
-                  • {file.name}
-                </li>
-              ))}
-            </ul>
-          )}
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-[#4A5568]">
+              Tipo
+            </label>
+            <input
+              type="text"
+              className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm text-[#1A202C] placeholder:text-[#A0AEC0] focus:border-[#5834b7] focus:outline-none focus:ring-1 focus:ring-[#5834b733]"
+              placeholder="Ej: Link, Documento, Imagen..."
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-[#4A5568]">
+              URL o enlace (opcional)
+            </label>
+            <input
+              type="url"
+              className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm text-[#1A202C] placeholder:text-[#A0AEC0] focus:border-[#5834b7] focus:outline-none focus:ring-1 focus:ring-[#5834b733]"
+              placeholder="https://..."
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+            />
+          </div>
         </div>
 
         <div className="mt-5 flex justify-end gap-3">
@@ -815,9 +746,9 @@ function RequestChangesModal({ order, onSubmit, onClose }) {
           <button
             type="button"
             className="inline-flex items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9]"
-            onClick={handleSend}
+            onClick={handleSave}
           >
-            Enviar solicitud
+            Guardar entregable
           </button>
         </div>
       </div>
@@ -825,19 +756,19 @@ function RequestChangesModal({ order, onSubmit, onClose }) {
   );
 }
 
-const ORDER_STEPS_CLIENT = [
-  { key: "pending", label: "Pedido enviado" },
+const ORDER_STEPS_FREELANCER = [
+  { key: "pending", label: "Pedido recibido" },
   { key: "in_process", label: "En proceso" },
-  { key: "review", label: "En revisión" },
+  { key: "review", label: "En revisión del cliente" },
   { key: "delivered", label: "Finalizado" },
 ];
 
-function OrderProgressClient({ status }) {
+function FreelancerOrderProgress({ status }) {
   const index = Math.max(
-    ORDER_STEPS_CLIENT.findIndex((step) => step.key === status),
+    ORDER_STEPS_FREELANCER.findIndex((step) => step.key === status),
     0
   );
-  const total = ORDER_STEPS_CLIENT.length;
+  const total = ORDER_STEPS_FREELANCER.length;
   const progressPercent = ((index + 1) / total) * 100;
 
   return (
@@ -859,7 +790,7 @@ function OrderProgressClient({ status }) {
       </div>
 
       <div className="mt-1 flex justify-between text-[10px] text-[#A0AEC0]">
-        {ORDER_STEPS_CLIENT.map((step, i) => (
+        {ORDER_STEPS_FREELANCER.map((step, i) => (
           <span
             key={step.key}
             className={
@@ -874,11 +805,10 @@ function OrderProgressClient({ status }) {
   );
 }
 
-function OrderDetailModal({ order, onClose }) {
-  const nextStep = getNextStepForClient(order.status);
+function FreelancerOrderDetailModal({ order, onClose }) {
   const statusCfg = ORDER_STATUS_CONFIG[order.status];
-  const [showDeliverables, setShowDeliverables] = useState(true);
   const closeButtonRef = useRef(null);
+  const nextStep = getNextStepForFreelancer(order.status);
 
   // Cerrar con Esc
   useEffect(() => {
@@ -908,21 +838,27 @@ function OrderDetailModal({ order, onClose }) {
         className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="order-detail-title"
+        aria-labelledby="freelancer-order-detail-title"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
             <h2
-              id="order-detail-title"
+              id="freelancer-order-detail-title"
               className="text-xl font-semibold text-[#1A202C]"
             >
-              Detalles del pedido
+              Detalles del pedido (freelancer)
             </h2>
             <p className="mt-1 text-sm text-[#718096]">
               ID:{" "}
               <span className="font-medium text-[#1A202C]">
                 {order.id}
+              </span>
+            </p>
+            <p className="mt-1 text-sm text-[#718096]">
+              Cliente:{" "}
+              <span className="font-medium text-[#1A202C]">
+                {order.clientName}
               </span>
             </p>
           </div>
@@ -961,22 +897,6 @@ function OrderDetailModal({ order, onClose }) {
             </div>
 
             <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-[#718096] sm:text-sm">
-              <div className="flex items-center gap-2">
-                <img
-                  src={order.freelancerAvatar}
-                  alt={order.freelancerName}
-                  className="h-8 w-8 rounded-full object-cover"
-                />
-                <div className="flex flex-col">
-                  <span className="font-medium text-[#1A202C]">
-                    {order.freelancerName}
-                  </span>
-                  <span>Freelancer</span>
-                </div>
-              </div>
-
-              <span className="hidden h-1 w-1 rounded-full bg-[#E2E8F0] sm:inline-block" />
-
               <span>
                 Pedido:{" "}
                 <span className="font-medium text-[#1A202C]">
@@ -996,7 +916,7 @@ function OrderDetailModal({ order, onClose }) {
           </div>
         </div>
 
-        <OrderProgressClient status={order.status} />
+        <FreelancerOrderProgress status={order.status} />
 
         <div className="space-y-4">
           <section>
@@ -1012,7 +932,7 @@ function OrderDetailModal({ order, onClose }) {
             <section>
               <div className="mb-2 flex items-center justify-between">
                 <h4 className="text-sm font-semibold text-[#1A202C]">
-                  Entregables del pedido
+                  Entregables cargados
                 </h4>
                 <span className="text-xs text-[#718096]">
                   {order.deliverables.length}{" "}
@@ -1022,62 +942,50 @@ function OrderDetailModal({ order, onClose }) {
                 </span>
               </div>
 
-              {showDeliverables ? (
-                <ul className="space-y-2">
-                  {order.deliverables.map((file) => (
-                    <li
-                      key={file.id}
-                      className="flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm"
-                    >
-                      <div className="flex flex-1 items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F7FAFC] text-xs">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F7FAFC] text-xs">
-                            {getDeliverableIcon(file.type)}
-                          </div>
-
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-[#1A202C]">
-                            {file.name}
-                          </span>
-                          <span className="text-xs text-[#718096]">
-                            {file.type} · Subido el{" "}
-                            {formatDateEs(file.uploadedAt)}
-                          </span>
-                        </div>
+              <ul className="space-y-2">
+                {order.deliverables.map((file) => (
+                  <li
+                    key={file.id}
+                    className="flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm"
+                  >
+                    <div className="flex flex-1 items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F7FAFC] text-xs">
+                        {getDeliverableIcon(file.type)}
                       </div>
 
-                      <button
-                        type="button"
-                        className="ml-3 inline-flex items-center justify-center rounded-full border border-[#E2E8F0] px-3 py-1 text-xs font-medium text-[#5834b7] hover:bg-[#F7FAFC]"
-                        onClick={() => {
-                          if (file.url && file.url !== "#") {
-                            window.open(
-                              file.url,
-                              "_blank",
-                              "noopener,noreferrer"
-                            );
-                          } else {
-                            alert(
-                              `Este es un entregable de ejemplo (${file.name}). En la versión conectada abriría el archivo real.`
-                            );
-                          }
-                        }}
-                      >
-                        Ver
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-xs text-[#718096]">
-                  Los entregables están ocultos. Volvé a presionar{" "}
-                  <span className="font-semibold">
-                    “Ver entregables”
-                  </span>{" "}
-                  para mostrarlos.
-                </p>
-              )}
+                      <div className="flex flex-col">
+                        <span className="font-medium text-[#1A202C]">
+                          {file.name}
+                        </span>
+                        <span className="text-xs text-[#718096]">
+                          {file.type} · Subido el{" "}
+                          {formatDateEs(file.uploadedAt)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="ml-3 inline-flex items-center justify-center rounded-full border border-[#E2E8F0] px-3 py-1 text-xs font-medium text-[#5834b7] hover:bg-[#F7FAFC]"
+                      onClick={() => {
+                        if (file.url && file.url !== "#") {
+                          window.open(
+                            file.url,
+                            "_blank",
+                            "noopener,noreferrer"
+                          );
+                        } else {
+                          alert(
+                            `Este es un entregable de ejemplo (${file.name}). En la versión conectada abriría el archivo real.`
+                          );
+                        }
+                      }}
+                    >
+                      Ver
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </section>
           )}
 
@@ -1103,7 +1011,7 @@ function OrderDetailModal({ order, onClose }) {
           </section>
 
           {nextStep && (
-            <section>
+            <section className="mt-2">
               <h4 className="text-sm font-semibold text-[#1A202C]">
                 Próximo paso
               </h4>
@@ -1112,29 +1020,10 @@ function OrderDetailModal({ order, onClose }) {
               </p>
             </section>
           )}
-
-          <section className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              className="inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] sm:w-auto"
-            >
-              Ir al chat
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowDeliverables((prev) => !prev)}
-              className="inline-flex w-full items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9] sm:w-auto"
-            >
-              {showDeliverables
-                ? "Ocultar entregables"
-                : "Ver entregables"}
-            </button>
-          </section>
         </div>
       </div>
     </div>
   );
 }
 
-export default MisPedidos;
+export default MisPedidosFreelancer;

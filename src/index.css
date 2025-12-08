@@ -1,1 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Outfit:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 @import 'tailwindcss';
+
+* {
+    font-family: 'Roboto', sans-serif;
+}
+
+@theme {
+    --color-background: #fefefe;
+    --color-primary: #38ced6;
+    --color-primary-dark: #2aa8b0;
+    --color-secondary: #5834b7;
+    --color-text-primary: #011314;
+    --color-text-secondary-light: #d4d4d4;
+    --color-text-secondary-dark: #718096;
+    --color-hover-morado: #6a44c9;
+    --color-hover-cyan: #2aa8b0;
+}
+
+.contact-button{
+    @apply bg-primary-dark hover:bg-primary-dark/80 text-white px-4 py-2 rounded-lg transition cursor-pointer;
+}
+
+.sub-title{
+    @apply text-2xl font-semibold text-text-primary mb-6;
+}
+
+.filter-input{
+    @apply border border-text-secondary-dark rounded-lg outline-none py-2 px-4 shadow;
+}
+
+.dropdown {
+    animation: slideDown 0.3s ease-in-out alternate;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
