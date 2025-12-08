@@ -113,14 +113,19 @@ const MisPedidosFreelancer = () => {
   }, [orders, statusFilter, search]);
 
   const updateOrderStatus = (orderId, newStatus, updateText) => {
+    // TODO: cuando esté el backend, esta función debería:
+    // 1) Enviar el nuevo estado al endpoint de pedidos del freelancer:
+    //    api.patch(`/freelancer/orders/${orderId}`, { status: newStatus })
+    // 2) Esperar la respuesta y actualizar el listado según los datos reales
+    //    o volver a pedir todos los pedidos del freelancer.
     setOrders((prev) =>
       prev.map((order) =>
         order.id === orderId
           ? {
-              ...order,
-              status: newStatus,
-              lastUpdate: updateText ?? order.lastUpdate,
-            }
+            ...order,
+            status: newStatus,
+            lastUpdate: updateText ?? order.lastUpdate,
+          }
           : order
       )
     );
@@ -128,21 +133,27 @@ const MisPedidosFreelancer = () => {
 
   // Ahora acepta UNO o VARIOS entregables nuevos
   const handleAddDeliverable = (orderId, newDeliverableOrList) => {
+    // TODO: cuando esté el backend, este handler debería:
+    // 1) Subir los archivos reales al servidor (o a un storage tipo S3) y obtener las URLs.
+    // 2) Enviar los datos del entregable al endpoint:
+    //    api.post(`/freelancer/orders/${orderId}/deliverables`, payload)
+    // 3) Actualizar el estado local con la respuesta del backend
+    //    o refrescar el pedido desde la API.
     setOrders((prev) =>
       prev.map((order) =>
         order.id === orderId
           ? {
-              ...order,
-              deliverables: [
-                ...(order.deliverables || []),
-                ...(Array.isArray(newDeliverableOrList)
-                  ? newDeliverableOrList
-                  : [newDeliverableOrList]),
-              ],
-              status: "review",
-              lastUpdate:
-                "Subiste un nuevo entregable. El cliente puede revisarlo.",
-            }
+            ...order,
+            deliverables: [
+              ...(order.deliverables || []),
+              ...(Array.isArray(newDeliverableOrList)
+                ? newDeliverableOrList
+                : [newDeliverableOrList]),
+            ],
+            status: "review",
+            lastUpdate:
+              "Subiste un nuevo entregable. El cliente puede revisarlo.",
+          }
           : order
       )
     );
@@ -171,11 +182,10 @@ const MisPedidosFreelancer = () => {
                   key={key}
                   type="button"
                   onClick={() => setStatusFilter(key)}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                    statusFilter === "all"
-                      ? "bg-[#5834b7] text-white shadow-sm"
-                      : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
-                  }`}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${statusFilter === "all"
+                    ? "bg-[#5834b7] text-white shadow-sm"
+                    : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
+                    }`}
                 >
                   {cfg.label}
                 </button>
@@ -184,11 +194,10 @@ const MisPedidosFreelancer = () => {
                   key={key}
                   type="button"
                   onClick={() => setStatusFilter(key)}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                    statusFilter === key
-                      ? "bg-[#5834b7] text-white shadow-sm"
-                      : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
-                  }`}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${statusFilter === key
+                    ? "bg-[#5834b7] text-white shadow-sm"
+                    : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
+                    }`}
                 >
                   {cfg.label}
                 </button>
@@ -331,9 +340,8 @@ function FreelancerOrderCard({
 
           {/* Estado */}
           <span
-            className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium sm:text-sm ${
-              statusCfg?.badgeClasses ?? ""
-            }`}
+            className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium sm:text-sm ${statusCfg?.badgeClasses ?? ""
+              }`}
           >
             {statusCfg?.label}
           </span>
@@ -390,7 +398,9 @@ function FreelancerOrderCard({
             className="inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] md:w-auto"
             aria-label={`Ir al chat del pedido ${order.id} como freelancer`}
             onClick={() => {
-              // TODO: conectar con chat cuando esté integrado
+              // TODO: cuando el módulo de chat esté listo,
+              // navegar a la vista de chat del pedido como freelancer, por ejemplo:
+              // navigate(`/freelancer/mis-pedidos/${order.id}/chat`);
               console.log("Ir al chat del pedido (freelancer):", order.id);
             }}
           >
@@ -695,9 +705,8 @@ function FreelancerOrderDetailModal({ order, onClose }) {
                 {order.serviceTitle}
               </h3>
               <span
-                className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium sm:text-sm ${
-                  statusCfg?.badgeClasses ?? ""
-                }`}
+                className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium sm:text-sm ${statusCfg?.badgeClasses ?? ""
+                  }`}
               >
                 {statusCfg?.label}
               </span>

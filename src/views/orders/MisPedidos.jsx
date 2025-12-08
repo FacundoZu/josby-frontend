@@ -151,15 +151,19 @@ const MisPedidos = () => {
   }, [orders, statusFilter, search]);
 
   const handleAcceptDelivery = (orderId) => {
+    // TODO: cuando esté el backend, reemplazar esta actualización local
+    // por una llamada a la API, por ejemplo:
+    // await api.patch(`/orders/${orderId}`, { status: "delivered" });
+    // y refrescar el listado con la respuesta real.
     setOrders((prev) =>
       prev.map((order) =>
         order.id === orderId
           ? {
-              ...order,
-              status: "delivered",
-              lastUpdate:
-                "Entrega aceptada. El pago fue liberado al freelancer.",
-            }
+            ...order,
+            status: "delivered",
+            lastUpdate:
+              "Entrega aceptada. El pago fue liberado al freelancer.",
+          }
           : order
       )
     );
@@ -169,14 +173,20 @@ const MisPedidos = () => {
     const trimmed = message.trim();
     if (!trimmed) return;
 
+    // TODO: cuando esté el backend, este handler debería:
+    // 1) Enviar el mensaje y los archivos adjuntos al endpoint de "solicitar cambios"
+    //    por ejemplo: api.post(`/orders/${orderId}/request-changes`, { message, files })
+    // 2) Registrar también el mensaje en el chat del pedido.
+    // 3) Actualizar el estado del pedido según lo que devuelva el backend.
+
     setOrders((prev) =>
       prev.map((order) =>
         order.id === orderId
           ? {
-              ...order,
-              status: "in_process",
-              lastUpdate: `Solicitaste cambios: "${trimmed}"`,
-            }
+            ...order,
+            status: "in_process",
+            lastUpdate: `Solicitaste cambios: "${trimmed}"`,
+          }
           : order
       )
     );
@@ -214,11 +224,10 @@ const MisPedidos = () => {
                   key={key}
                   type="button"
                   onClick={() => setStatusFilter(key)}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                    statusFilter === "all"
-                      ? "bg-[#5834b7] text-white shadow-sm"
-                      : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
-                  }`}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${statusFilter === "all"
+                    ? "bg-[#5834b7] text-white shadow-sm"
+                    : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
+                    }`}
                 >
                   {cfg.label}
                 </button>
@@ -227,11 +236,10 @@ const MisPedidos = () => {
                   key={key}
                   type="button"
                   onClick={() => setStatusFilter(key)}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                    statusFilter === key
-                      ? "bg-[#5834b7] text-white shadow-sm"
-                      : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
-                  }`}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${statusFilter === key
+                    ? "bg-[#5834b7] text-white shadow-sm"
+                    : "bg-white text-[#718096] border border-[#E2E8F0] hover:bg-[#f3f4ff]"
+                    }`}
                 >
                   {cfg.label}
                 </button>
@@ -382,9 +390,8 @@ function OrderCard({
 
           {/* Estado */}
           <span
-            className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium sm:text-sm ${
-              statusCfg?.badgeClasses ?? ""
-            }`}
+            className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium sm:text-sm ${statusCfg?.badgeClasses ?? ""
+              }`}
           >
             {statusCfg?.label}
           </span>
@@ -456,7 +463,9 @@ function OrderCard({
             className="inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] md:w-auto"
             aria-label={`Ir al chat del pedido ${order.id}`}
             onClick={() => {
-              // TODO: conectar con chat cuando esté integrado
+              // TODO: cuando el módulo de chat esté listo,
+              // navegar a la vista de chat del pedido, por ejemplo:
+              // navigate(`/mis-pedidos/${order.id}/chat`);
               console.log("Ir al chat del pedido:", order.id);
             }}
           >
@@ -748,9 +757,8 @@ function OrderDetailModal({ order, onClose }) {
                 {order.serviceTitle}
               </h3>
               <span
-                className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium sm:text-sm ${
-                  statusCfg?.badgeClasses ?? ""
-                }`}
+                className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium sm:text-sm ${statusCfg?.badgeClasses ?? ""
+                  }`}
               >
                 {statusCfg?.label}
               </span>
