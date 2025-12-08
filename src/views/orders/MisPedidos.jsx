@@ -232,11 +232,26 @@ const MisPedidos = () => {
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Header */}
         <header className="mb-6">
-          <h1 className="text-2xl font-semibold text-[#1A202C] sm:text-3xl">
-            Mis pedidos
-          </h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-semibold text-[#1A202C] sm:text-3xl">
+              Mis pedidos
+            </h1>
+
+            {/* Chip de rol: Cliente */}
+            <span className="inline-flex items-center rounded-full bg-[#EBF8FF] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#2B6CB0]">
+              Cliente
+            </span>
+          </div>
+
           <p className="mt-1 text-sm text-[#718096] sm:text-base">
-            Gestioná los servicios que contrataste en Josby.
+            Estás viendo los pedidos de los servicios que contrataste en Josby.
+          </p>
+          <p className="mt-0.5 text-xs text-[#A0AEC0] sm:text-sm">
+            Si también trabajás como freelancer, vas a encontrar tus pedidos como
+            proveedor en la sección{" "}
+            <span className="font-semibold text-[#5834b7]">
+              “Mis pedidos como freelancer”.
+            </span>
           </p>
         </header>
 
