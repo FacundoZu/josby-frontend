@@ -9,13 +9,15 @@ import Service from "./views/service/Service";
 import ChatFreelancer from "./views/chat/ChatFreelancer";
 import GlobalSocketListener from "./listeners/GlobalSocketListener";
 import FormServices from "./views/formServices";
+import { Profile } from "./views/Profile";
+import { EditProfile } from "./views/EditProfile";
 
 
 export default function router() {
     return (
         <BrowserRouter>
             <GlobalSocketListener />
-            
+
             <Routes>
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Home />} />
@@ -23,7 +25,8 @@ export default function router() {
                     <Route path="/service/:id" element={<Service />} />
                     <Route path="/service" element={<FormServices />} />
                     <Route path="/chat" element={<ChatFreelancer />} />
-
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/edit-profile" element={<EditProfile />} />
                 </Route>
 
                 <Route path="/login" element={<Login />} />
