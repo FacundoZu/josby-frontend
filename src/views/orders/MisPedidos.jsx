@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useMemo, useState } from "react";
-import { acceptDelivery, acceptOrder, addDeliverable, finalizeOrder, getOrderByUser } from "../../API/orderApi";
+import { acceptDelivery, acceptOrder, addDeliverable, finalizeOrder, getOrderByUser, requestChanges } from "../../API/orderApi";
 import { Link, useSearchParams } from "react-router";
 import Spinner from "../../components/Spinner";
 import { useAuth } from "../../hooks/useAuth";
@@ -248,30 +248,19 @@ const MisPedidos = () => {
         }
     }
 
-    const handleRequestChanges = (orderId, message, files) => {
+    const handleRequestChanges = async (orderId, message) => {
         const trimmed = message.trim();
         if (!trimmed) return;
 
-        setOrders((prev) =>
-            prev.map((order) =>
-                order.id === orderId
-                    ? {
-                        ...order,
-                        status: "in_process",
-                        lastUpdate: `Solicitaste cambios: "${trimmed}"`,
-                    }
-                    : order
-            )
-        );
+        try{
+            const response = await requestChanges(orderId, message)
+            toast.success(response.message)
 
-        console.log("Solicitud de cambios para", orderId, "=>", trimmed);
-
-        if (files && files.length > 0) {
-            console.log(
-                "Archivos adjuntos:",
-                files.map((f) => f.name)
-            );
+        }catch(error){
+            console.error(error)
+            toast.error("Error al solicitar cambios")
         }
+        
     };
 
     return (
@@ -404,8 +393,8 @@ const MisPedidos = () => {
                 <RequestChangesModal
                     order={orderToRequestChanges}
                     onClose={() => setOrderToRequestChanges(null)}
-                    onSubmit={(id, message, files) => {
-                        handleRequestChanges(id, message, files);
+                    onSubmit={(id, message) => {
+                        handleRequestChanges(id, message);
                         setOrderToRequestChanges(null);
                     }}
                 />
@@ -763,16 +752,10 @@ function AcceptDeliveryModal({ order, onConfirm, onClose }) {
 
 function RequestChangesModal({ order, onSubmit, onClose }) {
     const [message, setMessage] = useState("");
-    const [files, setFiles] = useState([]);
-
-    const handleFilesChange = (e) => {
-        const filesArray = Array.from(e.target.files || []);
-        setFiles(filesArray);
-    };
 
     const handleSend = () => {
         if (!message.trim()) return;
-        onSubmit(order.id, message, files);
+        onSubmit(order.id, message);
     };
 
     return (
@@ -828,27 +811,6 @@ function RequestChangesModal({ order, onSubmit, onClose }) {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                     />
-                </div>
-
-                <div className="mt-3">
-                    <label className="mb-1 block text-xs font-semibold text-[#4A5568]">
-                        Adjuntar archivos (opcional)
-                    </label>
-                    <input
-                        type="file"
-                        multiple
-                        className="cursor-pointer block w-full text-xs text-[#718096] file:mr-2 file:rounded-full file:border-0 file:bg-[#E2E8F0] file:px-3 file:py-1 file:text-xs file:font-medium file:text-[#1A202C] hover:file:bg-[#CBD5E0]"
-                        onChange={handleFilesChange}
-                    />
-                    {files.length > 0 && (
-                        <ul className="mt-2 space-y-1 text-xs text-[#4A5568]">
-                            {files.map((file) => (
-                                <li key={file.name} className="truncate">
-                                    • {file.name}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
                 </div>
 
                 <div className="mt-5 flex justify-end gap-3">
@@ -1102,12 +1064,14 @@ function OrderDetailModal({ order, onClose, userRole }) {
 
                     {userRole === "user" && (
                         <section className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-                            <button
-                                type="button"
-                                className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] sm:w-auto"
-                            >
-                                Ir al chat
-                            </button>
+                            <Link to={`/service/${order.serviceId}`}>
+                                <button
+                                    type="button"
+                                    className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] sm:w-auto"
+                                >
+                                    Ir al chat
+                                </button>
+                            </Link>
 
                             <button
                                 type="button"

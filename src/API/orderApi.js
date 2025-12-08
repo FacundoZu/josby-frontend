@@ -101,3 +101,16 @@ export async function addDeliverable(orderId, entregable){
         throw error
     }
 }
+
+export async function requestChanges(orderId, changes){
+    try{
+        const { data } = await api.post(`/order/requestChanges/${orderId}`, {cambios: changes})
+        return data
+
+    }catch(error){
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error || "Error al solicitar cambios")
+        }
+        throw error
+    }
+}
