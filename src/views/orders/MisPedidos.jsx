@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { formatDateEs, formatPriceArs } from "../../utils/formatters";
 import { ORDER_STATUS_CONFIG } from "../../constants/orderStatus";
 
@@ -529,17 +529,38 @@ function OrderCard({
 }
 
 function AcceptDeliveryModal({ order, onConfirm, onClose }) {
+  const closeButtonRef = useRef(null);
+
+  // Cerrar con Esc
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  // Enfocar el botón de cerrar al abrir el modal
+  useEffect(() => {
+    if (closeButtonRef.current) {
+      closeButtonRef.current.focus();
+    }
+  }, []);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6"
-      onClick={onClose} // 👈 click en el fondo cierra
+      onClick={onClose} // click en el fondo cierra
     >
       <div
         className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="accept-delivery-title"
-        onClick={(e) => e.stopPropagation()} // 👈 evita que el click adentro cierre
+        onClick={(e) => e.stopPropagation()} // evita que el click adentro cierre
       >
         <div className="mb-3 flex items-start justify-between gap-4">
           <div>
@@ -558,8 +579,8 @@ function AcceptDeliveryModal({ order, onConfirm, onClose }) {
           </div>
           <button
             type="button"
+            ref={closeButtonRef}
             onClick={onClose}
-            aria-label="Cerrar modal de aceptación de entrega"
             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
           >
             ✕
@@ -616,6 +637,7 @@ function AcceptDeliveryModal({ order, onConfirm, onClose }) {
 function RequestChangesModal({ order, onSubmit, onClose }) {
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState([]);
+  const closeButtonRef = useRef(null);
 
   const handleFilesChange = (e) => {
     const filesArray = Array.from(e.target.files || []);
@@ -626,6 +648,25 @@ function RequestChangesModal({ order, onSubmit, onClose }) {
     if (!message.trim()) return;
     onSubmit(order.id, message, files);
   };
+
+  // Cerrar con Esc
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  // Enfocar botón cerrar al abrir
+  useEffect(() => {
+    if (closeButtonRef.current) {
+      closeButtonRef.current.focus();
+    }
+  }, []);
 
   return (
     <div
@@ -656,8 +697,8 @@ function RequestChangesModal({ order, onSubmit, onClose }) {
           </div>
           <button
             type="button"
+            ref={closeButtonRef}
             onClick={onClose}
-            aria-label="Cerrar modal de solicitud de cambios"
             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
           >
             ✕
@@ -728,6 +769,26 @@ function RequestChangesModal({ order, onSubmit, onClose }) {
 function OrderDetailModal({ order, onClose }) {
   const statusCfg = ORDER_STATUS_CONFIG[order.status];
   const [showDeliverables, setShowDeliverables] = useState(true);
+  const closeButtonRef = useRef(null);
+
+  // Cerrar con Esc
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  // Enfocar botón cerrar
+  useEffect(() => {
+    if (closeButtonRef.current) {
+      closeButtonRef.current.focus();
+    }
+  }, []);
 
   return (
     <div
@@ -759,8 +820,8 @@ function OrderDetailModal({ order, onClose }) {
 
           <button
             type="button"
+            ref={closeButtonRef}
             onClick={onClose}
-            aria-label="Cerrar modal de detalles del pedido"
             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
           >
             ✕

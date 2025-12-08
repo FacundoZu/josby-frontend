@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { formatDateEs, formatPriceArs } from "../../utils/formatters";
 import { ORDER_STATUS_CONFIG } from "../../constants/orderStatus";
 
@@ -490,6 +490,7 @@ function AddDeliverableModal({ order, onSubmit, onClose }) {
   const [type, setType] = useState("Link");
   const [url, setUrl] = useState("");
   const [files, setFiles] = useState([]);
+  const closeButtonRef = useRef(null);
 
   const handleFilesChange = (e) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -508,6 +509,7 @@ function AddDeliverableModal({ order, onSubmit, onClose }) {
 
     const todayStr = new Date().toISOString().slice(0, 10);
 
+    /** @type {Deliverable[]} */
     let deliverablesToAdd = [];
 
     if (files.length > 0) {
@@ -526,7 +528,7 @@ function AddDeliverableModal({ order, onSubmit, onClose }) {
         files.map((f) => f.name)
       );
     } else {
-      // Modo "solo link", como antes
+      // Modo "solo link"
       deliverablesToAdd = [
         {
           id: `DEL-${order.id}-${Date.now()}`,
@@ -538,8 +540,28 @@ function AddDeliverableModal({ order, onSubmit, onClose }) {
       ];
     }
 
+    // 👉 Siempre mandamos un ARRAY de entregables al padre
     onSubmit(order.id, deliverablesToAdd);
   };
+
+  // Cerrar con Esc
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  // Enfocar el botón de cerrar al abrir el modal
+  useEffect(() => {
+    if (closeButtonRef.current) {
+      closeButtonRef.current.focus();
+    }
+  }, []);
 
   return (
     <div
@@ -574,6 +596,7 @@ function AddDeliverableModal({ order, onSubmit, onClose }) {
           </div>
           <button
             type="button"
+            ref={closeButtonRef}
             onClick={onClose}
             aria-label="Cerrar modal de agregar entregable"
             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
@@ -669,6 +692,26 @@ function AddDeliverableModal({ order, onSubmit, onClose }) {
 
 function FreelancerOrderDetailModal({ order, onClose }) {
   const statusCfg = ORDER_STATUS_CONFIG[order.status];
+  const closeButtonRef = useRef(null);
+
+  // Cerrar con Esc
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  // Enfocar botón cerrar
+  useEffect(() => {
+    if (closeButtonRef.current) {
+      closeButtonRef.current.focus();
+    }
+  }, []);
 
   return (
     <div
@@ -706,8 +749,8 @@ function FreelancerOrderDetailModal({ order, onClose }) {
 
           <button
             type="button"
+            ref={closeButtonRef}
             onClick={onClose}
-            aria-label="Cerrar modal de detalles del pedido como freelancer"
             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
           >
             ✕
