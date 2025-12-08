@@ -26,7 +26,7 @@ export default function router() {
                     <Route path="/service" element={<FormServices />} />
                     <Route path="/chat" element={<ChatFreelancer />} />
                     <Route path="mis-pedidos" element={<MisPedidos />} />
-                    {/* <Route path="/mis-pedidos-freelancer" element={<MisPedidosFreelancer />} /> */}
+                    <Route path="/mis-pedidos-freelancer" element={<MisPedidosFreelancer />} />
                 </Route>
 
                 <Route path="/login" element={<Login />} />

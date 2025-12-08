@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { getOrderByUser } from "../../API/orderApi";
 import { Link, useSearchParams } from "react-router";
 import Spinner from "../../components/Spinner";
+import { useAuth } from "../../hooks/useAuth";
 
 const STATUS_CONFIG = {
     all: { label: "Todos" },
@@ -29,6 +30,7 @@ const STATUS_CONFIG = {
 };
 
 const MisPedidos = () => {
+    const { data } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const [statusFilter, setStatusFilter] = useState("all");
     const [search, setSearch] = useState("");
@@ -38,6 +40,8 @@ const MisPedidos = () => {
     const [orderToConfirm, setOrderToConfirm] = useState(null);
     const [orderToRequestChanges, setOrderToRequestChanges] = useState(null);
     const [loading, setLoading] = useState(true)
+
+    console.log("DATA AUTH:", data) // data.user.role
 
     const mapStatus = (estado) => {
         switch (estado) {
@@ -52,7 +56,24 @@ const MisPedidos = () => {
             default:
                 return "pending"
         }
-    }      
+    }    
+    
+    const mapOrder = (order) => {
+        return {
+            id: order._id,
+            serviceId: order.serviceId._id,
+            serviceTitle: order.serviceId.title,
+            serviceImage: order.serviceId.images[0],
+            freelancerName: `${order.freelancerId.firstname} ${order.freelancerId.lastname}`,
+            freelancerAvatar: order.freelancerId.image || "",
+            createdAt: order.createdAt,
+            estimatedDelivery: order.fechaEntrega,
+            price: order.precio,
+            status: mapStatus(order.estado),
+            lastUpdate: order.lastUpdateInfo || "Sin actualizaciones aún",
+            deliverables: order.entregables || []
+        }
+    }
 
     useEffect(() => {
         const getOrders = async () => {
@@ -63,22 +84,8 @@ const MisPedidos = () => {
                 const limit = searchParams.get("limit") || 9
 
                 const data = await getOrderByUser({ search, status, page, limit })
-                console.log(data)
                 setOrders(
-                    data.orders.map(order => ({
-                        id: order._id,
-                        serviceId: order.serviceId._id,
-                        serviceTitle: order.serviceId.title,
-                        serviceImage: order.serviceId.images[0],
-                        freelancerName: `${order.freelancerId.firstname} ${order.freelancerId.lastname}`,
-                        freelancerAvatar: order.freelancerId.image || "",
-                        createdAt: order.createdAt,
-                        estimatedDelivery: order.fechaEntrega,
-                        price: order.precio,
-                        status: mapStatus(order.estado),
-                        lastUpdate: order.lastUpdateInfo || "Sin actualizaciones aún",
-                        deliverables: order.entregables || []
-                    }))
+                    data.orders.map(order => mapOrder(order))
                 )
                 setPagination(data.pagination)
             }catch(error){
@@ -135,21 +142,8 @@ const MisPedidos = () => {
             });
 
             setOrders(
-                data.orders.map(order => ({
-                    id: order._id,
-                    serviceId: order.serviceId._id,
-                    serviceTitle: order.serviceId.title,
-                    serviceImage: order.serviceId.images[0],
-                    freelancerName: `${order.freelancerId.firstname} ${order.freelancerId.lastname}`,
-                    freelancerAvatar: order.freelancerId.image || "",
-                    createdAt: order.createdAt,
-                    estimatedDelivery: order.fechaEntrega,
-                    price: order.precio,
-                    status: mapStatus(order.estado),
-                    lastUpdate: order.lastUpdateInfo || "Sin actualizaciones aún",
-                    deliverables: order.entregables || []
-                }))
-            );
+                data.orders.map(order => mapOrder(order))
+            )
 
             setPagination(data.pagination);
 
@@ -770,11 +764,18 @@ function OrderDetailModal({ order, onClose }) {
 
                         <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-[#718096] sm:text-sm">
                             <div className="flex items-center gap-2">
-                                <img
-                                    src={order.freelancerAvatar}
-                                    alt={order.freelancerName}
-                                    className="h-8 w-8 rounded-full object-cover"
-                                />
+                                {order.freelancerAvatar ? (
+                                    <img
+                                        src={order.freelancerAvatar}
+                                        alt={order.freelancerName}
+                                        className="h-7 w-7 rounded-full object-cover"
+                                    />
+                                ): (
+                                    <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                                        {order.freelancerName.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                        
                                 <div className="flex flex-col">
                                     <span className="font-medium text-[#1A202C]">
                                         {order.freelancerName}
@@ -805,16 +806,7 @@ function OrderDetailModal({ order, onClose }) {
                 </div>
 
                 <div className="space-y-4">
-                    <section>
-                        <h4 className="text-sm font-semibold text-[#1A202C]">
-                            Descripción del servicio
-                        </h4>
-                        <p className="mt-1 text-sm text-[#4A5568]">
-                            {order.description}
-                        </p>
-                    </section>
-
-                    {order.deliverables && order.deliverables.length > 0 && (
+                    {order.deliverables && (
                         <section>
                             <div className="mb-2 flex items-center justify-between">
                                 <h4 className="text-sm font-semibold text-[#1A202C]">
