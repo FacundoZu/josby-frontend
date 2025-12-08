@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { formatDateEs, formatPriceArs } from "../../utils/formatters";
 
 const STATUS_CONFIG = {
   all: { label: "Todos" },
@@ -148,13 +149,19 @@ const MisPedidosFreelancer = () => {
     );
   };
 
-  const handleAddDeliverable = (orderId, newDeliverable) => {
+  // Ahora acepta UNO o VARIOS entregables nuevos
+  const handleAddDeliverable = (orderId, newDeliverableOrList) => {
     setOrders((prev) =>
       prev.map((order) =>
         order.id === orderId
           ? {
               ...order,
-              deliverables: [...(order.deliverables || []), newDeliverable],
+              deliverables: [
+                ...(order.deliverables || []),
+                ...(Array.isArray(newDeliverableOrList)
+                  ? newDeliverableOrList
+                  : [newDeliverableOrList]),
+              ],
               status: "review",
               lastUpdate:
                 "Subiste un nuevo entregable. El cliente puede revisarlo.",
@@ -233,13 +240,38 @@ const MisPedidosFreelancer = () => {
         {/* Listado / Empty state */}
         {filteredOrders.length === 0 ? (
           <div className="mt-10 rounded-2xl border border-dashed border-[#E2E8F0] bg-white px-6 py-10 text-center">
-            <p className="text-lg font-semibold text-[#1A202C]">
-              Todavía no tenés pedidos con este filtro
-            </p>
-            <p className="mt-2 text-sm text-[#718096]">
-              Cuando un cliente contrate uno de tus servicios, lo vas a ver
-              acá.
-            </p>
+            {orders.length === 0 ? (
+              <>
+                <p className="text-lg font-semibold text-[#1A202C]">
+                  Todavía no tenés pedidos.
+                </p>
+                <p className="mt-2 text-sm text-[#718096]">
+                  Cuando un cliente contrate uno de tus servicios, lo vas a
+                  ver acá.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-lg font-semibold text-[#1A202C]">
+                  No encontramos pedidos que coincidan con los filtros
+                  actuales.
+                </p>
+                <p className="mt-2 text-sm text-[#718096]">
+                  Probá ajustar la búsqueda o limpiar los filtros para ver
+                  todos tus pedidos.
+                </p>
+                <button
+                  type="button"
+                  className="mt-4 inline-flex items-center justify-center rounded-full bg-[#5834b7] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9]"
+                  onClick={() => {
+                    setStatusFilter("all");
+                    setSearch("");
+                  }}
+                >
+                  Limpiar filtros
+                </button>
+              </>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
@@ -269,8 +301,8 @@ const MisPedidosFreelancer = () => {
         <AddDeliverableModal
           order={orderToAddDeliverable}
           onClose={() => setOrderToAddDeliverable(null)}
-          onSubmit={(id, newDeliverable) => {
-            handleAddDeliverable(id, newDeliverable);
+          onSubmit={(id, newDeliverables) => {
+            handleAddDeliverable(id, newDeliverables);
             setOrderToAddDeliverable(null);
           }}
         />
@@ -335,7 +367,7 @@ function FreelancerOrderCard({
           <span>
             Pedido:{" "}
             <span className="font-medium text-[#1A202C]">
-              {formatDate(order.createdAt)}
+              {formatDateEs(order.createdAt)}
             </span>
           </span>
 
@@ -344,7 +376,7 @@ function FreelancerOrderCard({
           <span>
             Entrega estimada:{" "}
             <span className="font-medium text-[#1A202C]">
-              {formatDate(order.estimatedDelivery)}
+              {formatDateEs(order.estimatedDelivery)}
             </span>
           </span>
         </div>
@@ -361,7 +393,7 @@ function FreelancerOrderCard({
         <div className="flex items-baseline justify-between md:flex-col md:items-end md:gap-1">
           <span className="text-xs text-[#718096]">Total</span>
           <span className="text-lg font-semibold text-[#1A202C] md:text-xl">
-            AR$ {order.price.toLocaleString("es-AR")}
+            AR$ {formatPriceArs(order.price)}
           </span>
         </div>
 
@@ -370,6 +402,7 @@ function FreelancerOrderCard({
           <button
             type="button"
             onClick={() => onViewDetails(order)}
+            aria-label={`Ver detalles del pedido ${order.id} como freelancer`}
             className="inline-flex w-full items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9] md:w-auto"
           >
             Ver detalles
@@ -378,7 +411,9 @@ function FreelancerOrderCard({
           <button
             type="button"
             className="inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] md:w-auto"
+            aria-label={`Ir al chat del pedido ${order.id} como freelancer`}
             onClick={() => {
+              // TODO: conectar con chat cuando esté integrado
               console.log("Ir al chat del pedido (freelancer):", order.id);
             }}
           >
@@ -397,6 +432,7 @@ function FreelancerOrderCard({
                     "Aceptaste el pedido. El estado ahora es En proceso."
                   )
                 }
+                aria-label={`Aceptar pedido ${order.id}`}
                 className="inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
               >
                 Aceptar pedido
@@ -407,6 +443,7 @@ function FreelancerOrderCard({
               <button
                 type="button"
                 onClick={() => onOpenAddDeliverable(order)}
+                aria-label={`Subir entregable para el pedido ${order.id}`}
                 className="inline-flex w-full items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-1.5 text-xs font-medium text-[#718096] transition hover:bg-[#F7FAFC] md:w-auto"
               >
                 Subir entregable / pasar a revisión
@@ -423,6 +460,7 @@ function FreelancerOrderCard({
                     "Marcaste el pedido como finalizado. Esperá a que el cliente acepte la entrega."
                   )
                 }
+                aria-label={`Marcar como finalizado el pedido ${order.id}`}
                 className="inline-flex w-full items-center justify-center rounded-full border border-[#28a745] px-4 py-1.5 text-xs font-medium text-[#28a745] transition hover:bg-[#28a74510] md:w-auto"
               >
                 Marcar como finalizado
@@ -439,19 +477,56 @@ function AddDeliverableModal({ order, onSubmit, onClose }) {
   const [name, setName] = useState("");
   const [type, setType] = useState("Link");
   const [url, setUrl] = useState("");
+  const [files, setFiles] = useState([]);
+
+  const handleFilesChange = (e) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    setFiles(selectedFiles);
+  };
 
   const handleSave = () => {
-    if (!name.trim()) return;
+    const trimmedName = name.trim();
+    const trimmedType = type.trim();
+    const trimmedUrl = url.trim();
 
-    const newDeliverable = {
-      id: `DEL-${order.id}-${Date.now()}`,
-      name: name.trim(),
-      type: type.trim(),
-      uploadedAt: new Date().toISOString().slice(0, 10),
-      url: url.trim() || "#",
-    };
+    // Si no hay archivos y tampoco nombre para el link, no hacemos nada
+    if (files.length === 0 && !trimmedName) {
+      return;
+    }
 
-    onSubmit(order.id, newDeliverable);
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    let deliverablesToAdd = [];
+
+    if (files.length > 0) {
+      // Creamos un entregable por archivo
+      deliverablesToAdd = files.map((file) => ({
+        id: `DEL-${order.id}-${file.name}-${Date.now()}`,
+        name: file.name,
+        type: "Archivo",
+        uploadedAt: todayStr,
+        url: "#", // En la versión real, esto sería la URL devuelta por el backend
+      }));
+
+      console.log(
+        "Archivos agregados como entregables para",
+        order.id,
+        files.map((f) => f.name)
+      );
+    } else {
+      // Modo "solo link", como antes
+      deliverablesToAdd = [
+        {
+          id: `DEL-${order.id}-${Date.now()}`,
+          name: trimmedName,
+          type: trimmedType || "Link",
+          uploadedAt: todayStr,
+          url: trimmedUrl || "#",
+        },
+      ];
+    }
+
+    onSubmit(order.id, deliverablesToAdd);
   };
 
   return (
@@ -480,25 +555,53 @@ function AddDeliverableModal({ order, onSubmit, onClose }) {
                 {order.id}
               </span>
             </p>
+            <p className="mt-1 text-xs text-[#A0AEC0]">
+              Podés subir archivos o compartir un link. En una versión
+              conectada, estos archivos se enviarían al backend.
+            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
+            aria-label="Cerrar modal de agregar entregable"
             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
           >
             ✕
           </button>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
+          {/* Subir archivos */}
           <div>
             <label className="mb-1 block text-xs font-semibold text-[#4A5568]">
-              Nombre del entregable
+              Subir archivos (opcional)
+            </label>
+            <input
+              type="file"
+              multiple
+              className="block w-full text-xs text-[#718096] file:mr-2 file:rounded-full file:border-0 file:bg-[#E2E8F0] file:px-3 file:py-1 file:text-xs file:font-medium file:text-[#1A202C] hover:file:bg-[#CBD5E0]"
+              onChange={handleFilesChange}
+            />
+            {files.length > 0 && (
+              <ul className="mt-2 space-y-1 text-xs text-[#4A5568]">
+                {files.map((file) => (
+                  <li key={file.name} className="truncate">
+                    • {file.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Datos de link / referencia */}
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-[#4A5568]">
+              Nombre del entregable (para link)
             </label>
             <input
               type="text"
               className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm text-[#1A202C] placeholder:text-[#A0AEC0] focus:border-[#5834b7] focus:outline-none focus:ring-1 focus:ring-[#5834b733]"
-              placeholder="Ej: Diseño_logo_v2.pdf"
+              placeholder="Ej: Link a sitio en producción"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -592,6 +695,7 @@ function FreelancerOrderDetailModal({ order, onClose }) {
           <button
             type="button"
             onClick={onClose}
+            aria-label="Cerrar modal de detalles del pedido como freelancer"
             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
           >
             ✕
@@ -626,7 +730,7 @@ function FreelancerOrderDetailModal({ order, onClose }) {
               <span>
                 Pedido:{" "}
                 <span className="font-medium text-[#1A202C]">
-                  {formatDate(order.createdAt)}
+                  {formatDateEs(order.createdAt)}
                 </span>
               </span>
 
@@ -635,7 +739,7 @@ function FreelancerOrderDetailModal({ order, onClose }) {
               <span>
                 Entrega estimada:{" "}
                 <span className="font-medium text-[#1A202C]">
-                  {formatDate(order.estimatedDelivery)}
+                  {formatDateEs(order.estimatedDelivery)}
                 </span>
               </span>
             </div>
@@ -682,7 +786,7 @@ function FreelancerOrderDetailModal({ order, onClose }) {
                         </span>
                         <span className="text-xs text-[#718096]">
                           {file.type} · Subido el{" "}
-                          {formatDate(file.uploadedAt)}
+                          {formatDateEs(file.uploadedAt)}
                         </span>
                       </div>
                     </div>
@@ -722,7 +826,7 @@ function FreelancerOrderDetailModal({ order, onClose }) {
             <div>
               <p className="text-xs text-[#718096]">Total</p>
               <p className="mt-1 text-lg font-semibold">
-                AR$ {order.price.toLocaleString("es-AR")}
+                AR$ {formatPriceArs(order.price)}
               </p>
             </div>
             <div>
@@ -736,19 +840,6 @@ function FreelancerOrderDetailModal({ order, onClose }) {
       </div>
     </div>
   );
-}
-
-function formatDate(dateStr) {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("es-AR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  } catch {
-    return dateStr;
-  }
 }
 
 export default MisPedidosFreelancer;
