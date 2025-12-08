@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { formatDateEs, formatPriceArs } from "../../utils/formatters";
 import { ORDER_STATUS_CONFIG } from "../../constants/orderStatus";
 import { getDeliverableIcon } from "../../utils/deliverables";
+import Toast from "../../components/feedback/Toast.jsx";
 
 /**
  * @typedef {Object} Deliverable
@@ -177,6 +178,11 @@ const MisPedidos = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderToConfirm, setOrderToConfirm] = useState(null);
   const [orderToRequestChanges, setOrderToRequestChanges] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = "info") => {
+    setToast({ message, type });
+  };
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
@@ -373,6 +379,7 @@ const MisPedidos = () => {
                 onViewDetails={setSelectedOrder}
                 onAskAccept={setOrderToConfirm}
                 onAskRequestChanges={setOrderToRequestChanges}
+                onShowToast={showToast}
               />
             ))}
           </div>
@@ -395,6 +402,7 @@ const MisPedidos = () => {
           onConfirm={(id) => {
             handleAcceptDelivery(id);
             setOrderToConfirm(null);
+            showToast("Entrega aceptada. El pago será liberado al freelancer.", "success");
           }}
         />
       )}
@@ -407,7 +415,16 @@ const MisPedidos = () => {
           onSubmit={(id, message, files) => {
             handleRequestChanges(id, message, files);
             setOrderToRequestChanges(null);
+            showToast("Solicitud de cambios enviada al freelancer.", "info");
           }}
+        />
+      )}
+      
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
         />
       )}
     </div>
@@ -419,6 +436,7 @@ function OrderCard({
   onViewDetails,
   onAskAccept,
   onAskRequestChanges,
+  onShowToast,
 }) {
   const statusCfg = ORDER_STATUS_CONFIG[order.status];
   const nextStep = getNextStepForClient(order.status);
@@ -531,6 +549,9 @@ function OrderCard({
               // navegar a la vista de chat del pedido, por ejemplo:
               // navigate(`/mis-pedidos/${order.id}/chat`);
               console.log("Ir al chat del pedido:", order.id);
+              if (onShowToast) {
+                onShowToast("La vista de chat estará disponible en una próxima versión de Josby.", "info");
+              }
             }}
           >
             Ir al chat
@@ -1013,7 +1034,7 @@ function OrderDetailModal({ order, onClose }) {
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F7FAFC] text-xs">
                             {getDeliverableIcon(file.type)}
                           </div>
-                          
+
                         </div>
                         <div className="flex flex-col">
                           <span className="font-medium text-[#1A202C]">

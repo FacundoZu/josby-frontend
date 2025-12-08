@@ -138,6 +138,11 @@ const MisPedidosFreelancer = () => {
   const [orders, setOrders] = useState(MOCK_FREELANCER_ORDERS);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderToAddDeliverable, setOrderToAddDeliverable] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = "info") => {
+    setToast({ message, type });
+  };
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
@@ -321,6 +326,7 @@ const MisPedidosFreelancer = () => {
                 onViewDetails={setSelectedOrder}
                 onUpdateStatus={updateOrderStatus}
                 onOpenAddDeliverable={setOrderToAddDeliverable}
+                onShowToast={showToast}
               />
             ))}
           </div>
@@ -343,7 +349,16 @@ const MisPedidosFreelancer = () => {
           onSubmit={(id, newDeliverables) => {
             handleAddDeliverable(id, newDeliverables);
             setOrderToAddDeliverable(null);
+            showToast("Entregable(s) subido(s). El pedido pasó a revisión.", "success");
           }}
+        />
+      )}
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
         />
       )}
     </div>
@@ -355,6 +370,8 @@ function FreelancerOrderCard({
   onViewDetails,
   onUpdateStatus,
   onOpenAddDeliverable,
+  onShowToast,
+
 }) {
   const statusCfg = ORDER_STATUS_CONFIG[order.status];
 
@@ -463,6 +480,9 @@ function FreelancerOrderCard({
               // navegar a la vista de chat del pedido como freelancer, por ejemplo:
               // navigate(`/freelancer/mis-pedidos/${order.id}/chat`);
               console.log("Ir al chat del pedido (freelancer):", order.id);
+              if (onShowToast) {
+                onShowToast("La vista de chat para freelancers llegará en próximas versiones.", "info");
+              }
             }}
           >
             Ir al chat
@@ -473,13 +493,16 @@ function FreelancerOrderCard({
             {canAccept && (
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
                   onUpdateStatus(
                     order.id,
                     "in_process",
                     "Aceptaste el pedido. El estado ahora es En proceso."
-                  )
-                }
+                  );
+                  if (onShowToast) {
+                    onShowToast("Aceptaste el pedido. Ahora está en proceso.", "success");
+                  }
+                }}
                 aria-label={`Aceptar pedido ${order.id}`}
                 className="inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
               >
@@ -501,13 +524,19 @@ function FreelancerOrderCard({
             {canMarkDelivered && (
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
                   onUpdateStatus(
                     order.id,
                     "delivered",
                     "Marcaste el pedido como finalizado. Esperá a que el cliente acepte la entrega."
-                  )
-                }
+                  );
+                  if (onShowToast) {
+                    onShowToast(
+                      "Marcaste el pedido como finalizado. El cliente debe aceptar la entrega.",
+                      "info"
+                    );
+                  }
+                }}
                 aria-label={`Marcar como finalizado el pedido ${order.id}`}
                 className="inline-flex w-full items-center justify-center rounded-full border border-[#28a745] px-4 py-1.5 text-xs font-medium text-[#28a745] transition hover:bg-[#28a74510] md:w-auto"
               >
