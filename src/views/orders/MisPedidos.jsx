@@ -39,9 +39,8 @@ const MisPedidos = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [orderToConfirm, setOrderToConfirm] = useState(null);
     const [orderToRequestChanges, setOrderToRequestChanges] = useState(null);
+    const [orderToAddDeliverable, setOrderToAddDeliverable] = useState(null);
     const [loading, setLoading] = useState(true)
-
-    console.log("DATA AUTH:", data) // data.user.role
 
     const mapStatus = (estado) => {
         switch (estado) {
@@ -65,6 +64,8 @@ const MisPedidos = () => {
             serviceTitle: order.serviceId.title,
             serviceImage: order.serviceId.images[0],
             freelancerName: `${order.freelancerId.firstname} ${order.freelancerId.lastname}`,
+            clientName: `${order.clienteId.firstname} ${order.clienteId.lastname}`,
+            clientAvatar: order.clienteId.image || "",
             freelancerAvatar: order.freelancerId.image || "",
             createdAt: order.createdAt,
             estimatedDelivery: order.fechaEntrega,
@@ -154,6 +155,35 @@ const MisPedidos = () => {
         }
     }
 
+    const updateOrderStatus = (orderId, newStatus, updateText) => {
+        setOrders((prev) =>
+        prev.map((order) =>
+            order.id === orderId
+            ? {
+                ...order,
+                status: newStatus,
+                lastUpdate: updateText ?? order.lastUpdate,
+                }
+            : order
+        )
+        );
+    };
+
+    const handleAddDeliverable = (orderId, newDeliverable) => {
+        setOrders((prev) =>
+        prev.map((order) =>
+            order.id === orderId
+            ? {
+                ...order,
+                deliverables: [...(order.deliverables || []), newDeliverable],
+                status: "review",
+                lastUpdate:
+                    "Subiste un nuevo entregable. El cliente puede revisarlo.",
+                }
+            : order
+        )
+        );
+    };
 
     const handleAcceptDelivery = (orderId) => {
         setOrders((prev) =>
@@ -290,6 +320,9 @@ const MisPedidos = () => {
                                 onViewDetails={setSelectedOrder}
                                 onAskAccept={setOrderToConfirm}
                                 onAskRequestChanges={setOrderToRequestChanges}
+                                onUpdateStatus={updateOrderStatus}
+                                onOpenAddDeliverable={setOrderToAddDeliverable}
+                                userRole={data.user.role}
                             />
                         ))}
                     </div>
@@ -301,6 +334,7 @@ const MisPedidos = () => {
                 <OrderDetailModal
                     order={selectedOrder}
                     onClose={() => setSelectedOrder(null)}
+                    userRole={data.user.role}
                 />
             )}
 
@@ -325,6 +359,18 @@ const MisPedidos = () => {
                         handleRequestChanges(id, message, files);
                         setOrderToRequestChanges(null);
                     }}
+                />
+            )}
+
+            {/* Modal para agregar entregable */}
+            {orderToAddDeliverable && (
+                <AddDeliverableModal
+                    order={orderToAddDeliverable}
+                    onClose={() => setOrderToAddDeliverable(null)}
+                    onSubmit={(id, newDeliverable) => {
+                    handleAddDeliverable(id, newDeliverable);
+                    setOrderToAddDeliverable(null);
+                }}
                 />
             )}
 
@@ -361,8 +407,16 @@ function OrderCard({
     onViewDetails,
     onAskAccept,
     onAskRequestChanges,
+    onUpdateStatus,
+    onOpenAddDeliverable,
+    userRole
 }) {
     const statusCfg = STATUS_CONFIG[order.status];
+
+    //variables para el freelancer
+    const canAccept = order.status === "pending";
+    const canMarkInReview = order.status === "in_process";
+    const canMarkDelivered = order.status === "review";
 
     return (
         <article className="flex flex-col gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm transition hover:shadow-md md:flex-row md:items-stretch">
@@ -396,25 +450,37 @@ function OrderCard({
                     </span>
                 </div>
 
-                {/* Freelancer + Fechas */}
+                {/* Usuario + Fechas */}
                 <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-[#718096] sm:text-sm">
-                    <div className="flex items-center gap-2">
-                        {order.freelancerAvatar ? (
-                            <img
-                                src={order.freelancerAvatar}
-                                alt={order.freelancerName}
-                                className="h-7 w-7 rounded-full object-cover"
-                            />
-                        ): (
-                            <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
-                                {order.freelancerName.charAt(0).toUpperCase()}
-                            </div>
-                        )}
-                        
-                        <span className="font-medium text-[#1A202C]">
-                            {order.freelancerName}
-                        </span>
-                    </div>
+                    {userRole === "user" ? (
+                        <div className="flex items-center gap-2">
+                            {order.freelancerAvatar ? (
+                                <img
+                                    src={order.freelancerAvatar}
+                                    alt={order.freelancerName}
+                                    className="h-7 w-7 rounded-full object-cover"
+                                />
+                            ): (
+                                <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                                    {order.freelancerName.charAt(0).toUpperCase()}
+                                </div>
+                            )}
+                            
+                            <span className="font-medium text-[#1A202C]">
+                                {order.freelancerName}
+                            </span>
+                        </div>
+
+                    ): (
+                        <div className="flex gap-2">
+                            <p className="mt-1 text-xs text-[#718096] sm:text-sm">
+                                Cliente:{" "}
+                                <span className="font-medium text-[#1A202C]">
+                                    {order.clientName}
+                                </span>
+                            </p>
+                        </div>
+                    )}
 
                     <span className="hidden h-1 w-1 rounded-full bg-[#E2E8F0] sm:inline-block" />
 
@@ -442,62 +508,140 @@ function OrderCard({
             </div>
 
             {/* Precio y acciones */}
-            <div className="flex flex-col justify-between gap-3 border-t border-[#E2E8F0] pt-3 md:w-64 md:border-l md:border-t-0 md:pl-4 md:pt-0">
-                {/* Precio */}
-                <div className="flex items-baseline justify-between md:flex-col md:items-end md:gap-1">
-                    <span className="text-xs text-[#718096]">Total</span>
-                    <span className="text-lg font-semibold text-[#1A202C] md:text-xl">
-                        AR$ {order.price.toLocaleString("es-AR")}
-                    </span>
-                </div>
+            {userRole === "user" ? (
+                <div className="flex flex-col justify-between gap-3 border-t border-[#E2E8F0] pt-3 md:w-64 md:border-l md:border-t-0 md:pl-4 md:pt-0">
+                    {/* Precio */}
+                    <div className="flex items-baseline justify-between md:flex-col md:items-end md:gap-1">
+                        <span className="text-xs text-[#718096]">Total</span>
+                        <span className="text-lg font-semibold text-[#1A202C] md:text-xl">
+                            AR$ {order.price.toLocaleString("es-AR")}
+                        </span>
+                    </div>
 
-                {/* Botones principales + acciones extra */}
-                <div className="flex flex-col gap-2 md:items-end">
-                    {/* Botón Ver detalles */}
-                    <button
-                        type="button"
-                        onClick={() => onViewDetails(order)}
-                        className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9] md:w-auto"
-                    >
-                        Ver detalles
-                    </button>
-
-                    {/* Botón Ir al chat */}
-                    <Link 
-                        to={`/service/${order.serviceId}`}
-                    >
+                    {/* Botones principales + acciones extra */}
+                    <div className="flex flex-col gap-2 md:items-end">
+                        {/* Botón Ver detalles */}
                         <button
                             type="button"
-                            className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] md:w-auto"
+                            onClick={() => onViewDetails(order)}
+                            className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9] md:w-auto"
                         >
-                            Ir al chat
+                            Ver detalles
                         </button>
-                    </Link>
 
-                    {/* Acciones extra en revisión */}
-                    {order.status === "review" && (
-                        <div className="flex w-full flex-col gap-2 pt-1 md:items-end">
-                            <div className="flex flex-col gap-2 md:flex-row md:justify-end md:w-full">
-                                <button
-                                    type="button"
-                                    onClick={() => onAskAccept(order)}
-                                    className="cursor-pointer inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
-                                >
-                                    Aceptar entrega
-                                </button>
+                        {/* Botón Ir al chat */}
+                        <Link 
+                            to={`/service/${order.serviceId}`}
+                        >
+                            <button
+                                type="button"
+                                className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] md:w-auto"
+                            >
+                                Ir al chat
+                            </button>
+                        </Link>
 
-                                <button
-                                    type="button"
-                                    onClick={() => onAskRequestChanges(order)}
-                                    className="cursor-pointer inline-flex w-full items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-1.5 text-xs font-medium text-[#718096] transition hover:bg-[#F7FAFC] md:w-auto"
-                                >
-                                    Solicitar cambios
-                                </button>
+                        {/* Acciones extra en revisión */}
+                        {order.status === "review" && (
+                            <div className="flex w-full flex-col gap-2 pt-1 md:items-end">
+                                <div className="flex flex-col gap-2 md:flex-row md:justify-end md:w-full">
+                                    <button
+                                        type="button"
+                                        onClick={() => onAskAccept(order)}
+                                        className="cursor-pointer inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
+                                    >
+                                        Aceptar entrega
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => onAskRequestChanges(order)}
+                                        className="cursor-pointer inline-flex w-full items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-1.5 text-xs font-medium text-[#718096] transition hover:bg-[#F7FAFC] md:w-auto"
+                                    >
+                                        Solicitar cambios
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
-            </div>
+
+            ) : (
+                <div className="flex flex-col justify-between gap-3 border-t border-[#E2E8F0] pt-3 md:w-64 md:border-l md:border-t-0 md:pl-4 md:pt-0">
+                    {/* Precio */}
+                    <div className="flex items-baseline justify-between md:flex-col md:items-end md:gap-1">
+                        <span className="text-xs text-[#718096]">Total</span>
+                        <span className="text-lg font-semibold text-[#1A202C] md:text-xl">
+                            AR$ {order.price.toLocaleString("es-AR")}
+                        </span>
+                    </div>
+
+                    {/* Botones */}
+                    <div className="flex flex-col gap-2 md:items-end">
+                        <button
+                            type="button"
+                            onClick={() => onViewDetails(order)}
+                            className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9] md:w-auto"
+                        >
+                            Ver detalles
+                        </button>
+
+                        <Link to="/chat">
+                            <button
+                                type="button"
+                                className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] md:w-auto"
+                            >
+                                Ir al chat
+                            </button>
+                        </Link>
+
+                        {/* Acciones según estado */}
+                        <div className="mt-1 flex w-full flex-col gap-2 md:items-end">
+                            {canAccept && (
+                            <button
+                                type="button"
+                                onClick={() =>
+                                onUpdateStatus(
+                                    order.id,
+                                    "in_process",
+                                    "Aceptaste el pedido. El estado ahora es En proceso."
+                                )
+                                }
+                                className="cursor-pointer inline-flex w-full items-center justify-center rounded-full border border-[#5834b7] px-4 py-1.5 text-xs font-medium text-[#5834b7] transition hover:bg-[#5834b70d] md:w-auto"
+                            >
+                                Aceptar pedido
+                            </button>
+                            )}
+
+                            {canMarkInReview && (
+                            <button
+                                type="button"
+                                onClick={() => onOpenAddDeliverable(order)}
+                                className="cursor-pointer inline-flex w-full items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-1.5 text-xs font-medium text-[#718096] transition hover:bg-[#F7FAFC] md:w-auto"
+                            >
+                                Subir entregable / pasar a revisión
+                            </button>
+                            )}
+
+                            {canMarkDelivered && (
+                            <button
+                                type="button"
+                                onClick={() =>
+                                onUpdateStatus(
+                                    order.id,
+                                    "delivered",
+                                    "Marcaste el pedido como finalizado. Esperá a que el cliente acepte la entrega."
+                                )
+                                }
+                                className="cursor-pointer inline-flex w-full items-center justify-center rounded-full border border-[#28a745] px-4 py-1.5 text-xs font-medium text-[#28a745] transition hover:bg-[#28a74510] md:w-auto"
+                            >
+                                Marcar como finalizado
+                            </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </article>
     );
 }
@@ -698,7 +842,7 @@ function RequestChangesModal({ order, onSubmit, onClose }) {
     );
 }
 
-function OrderDetailModal({ order, onClose }) {
+function OrderDetailModal({ order, onClose, userRole }) {
     const statusCfg = STATUS_CONFIG[order.status];
     const [showDeliverables, setShowDeliverables] = useState(true);
 
@@ -763,26 +907,50 @@ function OrderDetailModal({ order, onClose }) {
                         </div>
 
                         <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-[#718096] sm:text-sm">
-                            <div className="flex items-center gap-2">
-                                {order.freelancerAvatar ? (
-                                    <img
-                                        src={order.freelancerAvatar}
-                                        alt={order.freelancerName}
-                                        className="h-7 w-7 rounded-full object-cover"
-                                    />
-                                ): (
-                                    <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
-                                        {order.freelancerName.charAt(0).toUpperCase()}
+                            {userRole === "user" ? (
+                                <div className="flex items-center gap-2">
+                                    {order.freelancerAvatar ? (
+                                        <img
+                                            src={order.freelancerAvatar}
+                                            alt={order.freelancerName}
+                                            className="h-7 w-7 rounded-full object-cover"
+                                        />
+                                    ): (
+                                        <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                                            {order.freelancerName.charAt(0).toUpperCase()}
+                                        </div>
+                                    )}
+                            
+                                    <div className="flex flex-col">
+                                        <span className="font-medium text-[#1A202C]">
+                                            {order.freelancerName}
+                                        </span>
+                                        <span>Freelancer</span>
                                     </div>
-                                )}
-                        
-                                <div className="flex flex-col">
-                                    <span className="font-medium text-[#1A202C]">
-                                        {order.freelancerName}
-                                    </span>
-                                    <span>Freelancer</span>
                                 </div>
-                            </div>
+
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    {order.clientAvatar ? (
+                                        <img
+                                            src={order.clientAvatar}
+                                            alt={order.clientName}
+                                            className="h-7 w-7 rounded-full object-cover"
+                                        />
+                                    ): (
+                                        <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                                            {order.clientName.charAt(0).toUpperCase()}
+                                        </div>
+                                    )}
+                            
+                                    <div className="flex flex-col">
+                                        <span className="font-medium text-[#1A202C]">
+                                            {order.clientName}
+                                        </span>
+                                        <span>Cliente</span>
+                                    </div>
+                                </div>
+                            )}
 
                             <span className="hidden h-1 w-1 rounded-full bg-[#E2E8F0] sm:inline-block" />
 
@@ -897,28 +1065,148 @@ function OrderDetailModal({ order, onClose }) {
                         </div>
                     </section>
 
-                    <section className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-                        <button
-                            type="button"
-                            className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] sm:w-auto"
-                        >
-                            Ir al chat
-                        </button>
+                    {userRole === "user" && (
+                        <section className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                            <button
+                                type="button"
+                                className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#38ced6] px-4 py-2 text-sm font-semibold text-[#1A202C] shadow-sm transition hover:bg-[#2aa8b0] sm:w-auto"
+                            >
+                                Ir al chat
+                            </button>
 
-                        <button
-                            type="button"
-                            onClick={() => setShowDeliverables((prev) => !prev)}
-                            className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9] sm:w-auto"
-                        >
-                            {showDeliverables
-                                ? "Ocultar entregables"
-                                : "Ver entregables"}
-                        </button>
-                    </section>
+                            <button
+                                type="button"
+                                onClick={() => setShowDeliverables((prev) => !prev)}
+                                className="cursor-pointer inline-flex w-full items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9] sm:w-auto"
+                            >
+                                {showDeliverables
+                                    ? "Ocultar entregables"
+                                    : "Ver entregables"}
+                            </button>
+                        </section>
+                    )}
+
                 </div>
             </div>
         </div>
     );
+}
+
+function AddDeliverableModal({ order, onSubmit, onClose }) {
+  const [name, setName] = useState("");
+  const [type, setType] = useState("Link");
+  const [url, setUrl] = useState("");
+
+  const handleSave = () => {
+    if (!name.trim()) return;
+
+    const newDeliverable = {
+      id: `DEL-${order.id}-${Date.now()}`,
+      name: name.trim(),
+      type: type.trim(),
+      uploadedAt: new Date().toISOString().slice(0, 10),
+      url: url.trim() || "#",
+    };
+
+    onSubmit(order.id, newDeliverable);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-deliverable-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-3 flex items-start justify-between gap-4">
+          <div>
+            <h2
+              id="add-deliverable-title"
+              className="text-lg font-semibold text-[#1A202C]"
+            >
+              Agregar entregable
+            </h2>
+            <p className="mt-1 text-sm text-[#718096]">
+              Pedido{" "}
+              <span className="font-medium text-[#1A202C]">
+                {order.id}
+              </span>
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="cursor-pointer inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] text-sm font-semibold text-[#718096] hover:bg-[#F7FAFC]"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-[#4A5568]">
+              Nombre del entregable
+            </label>
+            <input
+              type="text"
+              className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm text-[#1A202C] placeholder:text-[#A0AEC0] focus:border-[#5834b7] focus:outline-none focus:ring-1 focus:ring-[#5834b733]"
+              placeholder="Ej: Diseño_logo_v2.pdf"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-[#4A5568]">
+              Tipo
+            </label>
+            <input
+              type="text"
+              className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm text-[#1A202C] placeholder:text-[#A0AEC0] focus:border-[#5834b7] focus:outline-none focus:ring-1 focus:ring-[#5834b733]"
+              placeholder="Ej: Link, Documento, Imagen..."
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-[#4A5568]">
+              URL o enlace (opcional)
+            </label>
+            <input
+              type="url"
+              className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm text-[#1A202C] placeholder:text-[#A0AEC0] focus:border-[#5834b7] focus:outline-none focus:ring-1 focus:ring-[#5834b733]"
+              placeholder="https://..."
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="mt-5 flex justify-end gap-3">
+          <button
+            type="button"
+            className="cursor-pointer inline-flex items-center justify-center rounded-full border border-[#E2E8F0] px-4 py-2 text-sm font-medium text-[#718096] hover:bg-[#EDF2F7]"
+            onClick={onClose}
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            className="cursor-pointer inline-flex items-center justify-center rounded-full bg-[#5834b7] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6a44c9]"
+            onClick={handleSave}
+          >
+            Guardar entregable
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function formatDate(dateStr) {
