@@ -2,6 +2,31 @@ import { useMemo, useState } from "react";
 import { formatDateEs, formatPriceArs } from "../../utils/formatters";
 import { ORDER_STATUS_CONFIG } from "../../constants/orderStatus";
 
+/**
+ * @typedef {Object} Deliverable
+ * @property {string} id
+ * @property {string} name
+ * @property {string} type
+ * @property {string} uploadedAt
+ * @property {string} url
+ */
+
+/**
+ * @typedef {Object} FreelancerOrder
+ * @property {string} id
+ * @property {string} serviceTitle
+ * @property {string} serviceImage
+ * @property {string} clientName
+ * @property {string} createdAt
+ * @property {string} estimatedDelivery
+ * @property {number} price
+ * @property {"pending"|"in_process"|"review"|"delivered"} status
+ * @property {string} lastUpdate
+ * @property {string} description
+ * @property {Deliverable[]} deliverables
+ */
+
+/** @type {FreelancerOrder[]} */
 // Datos mock pensados desde el lado del FREELANCER
 const MOCK_FREELANCER_ORDERS = [
   {

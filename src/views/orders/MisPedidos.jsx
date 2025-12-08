@@ -2,6 +2,32 @@ import { useMemo, useState } from "react";
 import { formatDateEs, formatPriceArs } from "../../utils/formatters";
 import { ORDER_STATUS_CONFIG } from "../../constants/orderStatus";
 
+/**
+ * @typedef {Object} Deliverable
+ * @property {string} id          ID interno del entregable
+ * @property {string} name        Nombre del archivo o recurso
+ * @property {string} type        Tipo (Documento, Imagen, Video, Link...)
+ * @property {string} uploadedAt  Fecha de subida en formato ISO (YYYY-MM-DD)
+ * @property {string} url         URL de acceso al entregable
+ */
+
+/**
+ * @typedef {Object} Order
+ * @property {string} id
+ * @property {string} serviceTitle
+ * @property {string} serviceImage
+ * @property {string} freelancerName
+ * @property {string} freelancerAvatar
+ * @property {string} createdAt
+ * @property {string} estimatedDelivery
+ * @property {number} price
+ * @property {"pending"|"in_process"|"review"|"delivered"} status
+ * @property {string} lastUpdate
+ * @property {string} description
+ * @property {Deliverable[]} deliverables
+ */
+
+/** @type {Order[]} */
 // TODO: Reemplazar MOCK_ORDERS con datos reales del backend de Josby
 // cuando el endpoint de "mis pedidos" esté disponible.
 const MOCK_ORDERS = [
