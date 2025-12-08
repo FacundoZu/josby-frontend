@@ -116,6 +116,21 @@ const MOCK_FREELANCER_ORDERS = [
   },
 ];
 
+function getNextStepForFreelancer(status) {
+  switch (status) {
+    case "pending":
+      return "Revisá los detalles del pedido y aceptalo para empezar a trabajar. Si no podés tomarlo, más adelante vas a poder rechazarlo desde esta misma pantalla.";
+    case "in_process":
+      return "Trabajá en el pedido y subí uno o varios entregables para pasarlo a revisión del cliente.";
+    case "review":
+      return "Esperá la revisión del cliente. Si te pide cambios, respondé por el chat y subí una nueva versión del entregable.";
+    case "delivered":
+      return "El pedido está finalizado. Podés revisar el historial y usar este trabajo como referencia para tu portfolio.";
+    default:
+      return null;
+  }
+}
+
 const MisPedidosFreelancer = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -345,6 +360,7 @@ function FreelancerOrderCard({
   const canAccept = order.status === "pending";
   const canMarkInReview = order.status === "in_process";
   const canMarkDelivered = order.status === "review";
+  const nextStep = getNextStepForFreelancer(order.status);
 
   return (
     <article className="flex flex-col gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm transition hover:shadow-md md:flex-row md:items-stretch">
@@ -407,6 +423,13 @@ function FreelancerOrderCard({
         <p className="mt-2 text-xs text-[#718096] sm:text-sm">
           {order.lastUpdate}
         </p>
+
+        {nextStep && (
+          <p className="mt-1 text-xs text-[#4C51BF] sm:text-sm">
+            <span className="font-semibold mr-1">Próximo paso:</span>
+            {nextStep}
+          </p>
+        )}
       </div>
 
       {/* Precio y acciones */}
@@ -705,6 +728,7 @@ function AddDeliverableModal({ order, onSubmit, onClose }) {
 function FreelancerOrderDetailModal({ order, onClose }) {
   const statusCfg = ORDER_STATUS_CONFIG[order.status];
   const closeButtonRef = useRef(null);
+  const nextStep = getNextStepForFreelancer(order.status);
 
   // Cerrar con Esc
   useEffect(() => {
@@ -902,6 +926,17 @@ function FreelancerOrderDetailModal({ order, onClose }) {
               <p className="mt-1 text-sm">{order.lastUpdate}</p>
             </div>
           </section>
+
+          {nextStep && (
+            <section className="mt-2">
+              <h4 className="text-sm font-semibold text-[#1A202C]">
+                Próximo paso
+              </h4>
+              <p className="mt-1 text-sm text-[#4C51BF]">
+                {nextStep}
+              </p>
+            </section>
+          )}
         </div>
       </div>
     </div>

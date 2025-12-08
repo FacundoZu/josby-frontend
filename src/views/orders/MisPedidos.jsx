@@ -154,6 +154,21 @@ const MOCK_ORDERS = [
   },
 ];
 
+function getNextStepForClient(status) {
+  switch (status) {
+    case "pending":
+      return "Esperá que el freelancer acepte tu pedido. Si pasan varios días, podés escribirle por el chat para asegurarte de que vio la solicitud.";
+    case "in_process":
+      return "El freelancer está trabajando en tu pedido. Podés seguir el avance desde el chat y compartir más detalles o archivos si los necesita.";
+    case "review":
+      return "Revisá los entregables y, si estás conforme, aceptá la entrega. Si necesitás ajustes, usá el botón “Solicitar cambios”.";
+    case "delivered":
+      return "El pedido está finalizado. Más adelante vas a poder dejar una reseña al freelancer desde esta pantalla.";
+    default:
+      return null;
+  }
+}
+
 const MisPedidos = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -405,6 +420,7 @@ function OrderCard({
   onAskRequestChanges,
 }) {
   const statusCfg = ORDER_STATUS_CONFIG[order.status];
+  const nextStep = getNextStepForClient(order.status);
 
   return (
     <article className="flex flex-col gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm transition hover:shadow-md md:flex-row md:items-stretch">
@@ -474,8 +490,14 @@ function OrderCard({
         <p className="mt-2 text-xs text-[#718096] sm:text-sm">
           {order.lastUpdate}
         </p>
-      </div>
 
+        {nextStep && (
+          <p className="mt-1 text-xs text-[#4C51BF] sm:text-sm">
+            <span className="font-semibold mr-1">Próximo paso:</span>
+            {nextStep}
+          </p>
+        )}
+      </div>
       {/* Precio y acciones */}
       <div className="flex flex-col justify-between gap-3 border-t border-[#E2E8F0] pt-3 md:w-64 md:border-l md:border-t-0 md:pl-4 md:pt-0">
         {/* Precio */}
@@ -782,6 +804,7 @@ function RequestChangesModal({ order, onSubmit, onClose }) {
 }
 
 function OrderDetailModal({ order, onClose }) {
+  const nextStep = getNextStepForClient(order.status);
   const statusCfg = ORDER_STATUS_CONFIG[order.status];
   const [showDeliverables, setShowDeliverables] = useState(true);
   const closeButtonRef = useRef(null);
@@ -1002,6 +1025,17 @@ function OrderDetailModal({ order, onClose }) {
               <p className="mt-1 text-sm">{order.lastUpdate}</p>
             </div>
           </section>
+
+          {nextStep && (
+            <section>
+              <h4 className="text-sm font-semibold text-[#1A202C]">
+                Próximo paso
+              </h4>
+              <p className="mt-1 text-sm text-[#4C51BF]">
+                {nextStep}
+              </p>
+            </section>
+          )}
 
           <section className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <button
