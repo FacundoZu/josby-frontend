@@ -5,6 +5,7 @@ import { Link, useSearchParams } from "react-router";
 import Spinner from "../../components/Spinner";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify"
+import { OrderProgressClient } from "../../components/orders/OrderProgressClient";
 
 const STATUS_CONFIG = {
     all: { label: "Todos" },
@@ -964,6 +965,8 @@ function OrderDetailModal({ order, onClose, userRole }) {
                         </div>
                     </div>
                 </div>
+
+                <OrderProgressClient status={order.status} />
 
                 <div className="space-y-4">
                     {order.deliverables && (
