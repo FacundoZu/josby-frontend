@@ -17,32 +17,36 @@ export const Profile = () => {
         }
     }, [data]);
 
-    console.log(data);
-    const queryClient = useQueryClient();
+    // console.log(data);
+    // const queryClient = useQueryClient();
 
-    const setFreelancerMutation = useMutation({
-        mutationFn: setAsFreelancer,
-        onSuccess: () => {
-            console.log("Usuario cambiado a freelancer exitosamente");
-            setIsFreelancer(true);
-            setIsFreelancerModalOpen(false);
-            queryClient.invalidateQueries(['user']);
-        },
-        onError: (error) => {
-            console.error("Error al cambiar a freelancer:", error);
-        }
-    });
+    // const setFreelancerMutation = useMutation({
+    //     mutationFn: setAsFreelancer,
+    //     onSuccess: () => {
+    //         console.log("Usuario cambiado a freelancer exitosamente");
+    //         setIsFreelancer(true);
+    //         setIsFreelancerModalOpen(false);
+    //         queryClient.invalidateQueries(['user']);
+    //     },
+    //     onError: (error) => {
+    //         console.error("Error al cambiar a freelancer:", error);
+    //     }
+    // });
 
     const handleConfirmFreelancer = () => {
-        if (data?.user?.id) {
-            setFreelancerMutation.mutate(data.user.id);
-        } else {
-            console.error("No user ID found to set as freelancer");
-        }
+        // if (data?.user?.id) {
+        //     setFreelancerMutation.mutate(data.user.id);
+        // } else {
+        //     console.error("No user ID found to set as freelancer");
+        // }
+
+        navigate("/service")
+        setIsFreelancerModalOpen(false)
     };
+
     return (
         <>
-            <main className='py-8 bg-[#f6ffff]'>
+            <main className='py-8'>
                 <section className='max-w-3xl mx-auto bg-white rounded-xl shadow-md p-6 '>
                     <article className='pb-7 flex'>
                         <div className='rounded-full mx-10 my-5 p-1 shadow-md w-40'>
@@ -71,7 +75,7 @@ export const Profile = () => {
                     </article>
                     <hr className='border-[#ced2d7] mx-6' />
 
-                    {!isFreelancer ? (
+                    {!isFreelancer && (
                         <article className='bg-white flex flex-col justify-between items-center text-center p-6'>
                             <h2 className='font-bold text-xl pb-2 text-gray-800'>¿Querés ofrecer tus servicios?</h2>
                             <p className='text-sm text-gray-500 pb-6'>Unite a nuestra comunidad de freelancer y empieza a trabajar en <br />proyectos increíbles.</p>
@@ -85,9 +89,11 @@ export const Profile = () => {
                                 </svg>
                             </a>
                         </article>
-                    ) : (
+                    )} 
+                    {/*
+                    : (
                         <>
-                            {/* Sección de descripción */}
+                            {/* Sección de descripción 
                             <article className='bg-white p-6 relative'>
                                 <div className='flex justify-between items-center mb-4'>
                                     <h2 className='font-bold text-xl text-gray-900'>Descripción</h2>
@@ -105,7 +111,7 @@ export const Profile = () => {
 
 
 
-                            {/* Sección de ubicación */}
+                            {/* Sección de ubicación 
                             <article className='bg-white p-6 relative'>
                                 <div className='flex justify-between items-center mb-4'>
                                     <h2 className='font-bold text-xl text-gray-900'>Ubicación</h2>
@@ -125,7 +131,7 @@ export const Profile = () => {
                             </article>
                             <hr className='border-[#ced2d7] mx-6' />
 
-                            {/* Sección de educación */}
+                            {/* Sección de educación 
                             <article className='bg-white p-6 relative'>
                                 <div className='flex justify-between items-center mb-6'>
                                     <h2 className='font-bold text-xl text-gray-900'>Educación</h2>
@@ -156,7 +162,7 @@ export const Profile = () => {
                             </article>
                             <hr className='border-[#ced2d7] mx-6' />
 
-                            {/* Sección de Mis Habilidades */}
+                            {/* Sección de Mis Habilidades 
                             <article className='bg-white p-6 relative'>
                                 <div className='flex justify-between items-center mb-6'>
                                     <h2 className='font-bold text-xl text-gray-900'>Mis Habilidades</h2>
@@ -197,7 +203,7 @@ export const Profile = () => {
                                 </div>
                             </article>
                         </>
-                    )}
+                    ) */}
 
                 </section>
             </main >
