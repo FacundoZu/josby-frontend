@@ -9,3 +9,13 @@ export async function registerUser(userData) {
     throw error.response?.data || { message: "Error en la petición" };
   }
 };
+
+export async function setAsFreelancer(userId) {
+  try {
+    const url = `/user/set-as-freelancer/${userId}`;
+    const response = await api.put(url);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Error en la petición" };
+  }
+}

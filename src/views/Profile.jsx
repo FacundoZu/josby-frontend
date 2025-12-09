@@ -1,18 +1,44 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useAuth } from '../hooks/useAuth' //obtiene los datos del usuario logueado
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { setAsFreelancer } from '../API/userApi';
 import BecomeFreelancerModal from '../components/BecomeFreelancerModal';
 
 export const Profile = () => {
     const navigate = useNavigate();
+    const { data } = useAuth();
     const [isFreelancerModalOpen, setIsFreelancerModalOpen] = useState(false);
-    const [isFreelancer, setIsFreelancer] = useState(false);
+    const [isFreelancer, setIsFreelancer] = useState('user');
+
+    React.useEffect(() => {
+        if (data?.user?.role) {
+            setIsFreelancer(data.user.role === 'freelancer');
+        }
+    }, [data]);
+
+    console.log(data);
+    const queryClient = useQueryClient();
+
+    const setFreelancerMutation = useMutation({
+        mutationFn: setAsFreelancer,
+        onSuccess: () => {
+            console.log("Usuario cambiado a freelancer exitosamente");
+            setIsFreelancer(true);
+            setIsFreelancerModalOpen(false);
+            queryClient.invalidateQueries(['user']);
+        },
+        onError: (error) => {
+            console.error("Error al cambiar a freelancer:", error);
+        }
+    });
 
     const handleConfirmFreelancer = () => {
-        // TODO: Backend integration to switch role
-        console.log("Usuario cambiado a freelancer");
-        setIsFreelancer(true);
-        setIsFreelancerModalOpen(false);
+        if (data?.user?.id) {
+            setFreelancerMutation.mutate(data.user.id);
+        } else {
+            console.error("No user ID found to set as freelancer");
+        }
     };
     return (
         <>
@@ -20,14 +46,20 @@ export const Profile = () => {
                 <section className='max-w-3xl mx-auto bg-white rounded-xl shadow-md p-6 '>
                     <article className='pb-7 flex'>
                         <div className='rounded-full mx-10 my-5 p-1 shadow-md w-40'>
-                            <img className='rounded-full'
-                                src="../../public/user-image.webp" alt="imagen por defecto del usuario" />
+                            <img className='rounded-full w-full h-full object-cover'
+                                src={data?.user?.image || "../../public/user-image.webp"}
+                                alt="Foto de perfil del usuario"
+                            />
                         </div>
                         <div className='flex flex-col justify-around items-start'>
                             <div>
-                                <h2 className='font-bold pb-2 text-3xl'>Brisa Ledezma</h2>
-                                <p className='text-md text-gray-700'>Correo electrónico: brisaledezma@gmail.com</p>
-                                <p className='text-md text-gray-700'>Fecha de nacimiento: 14/01/2005</p>
+                                <h2 className='font-bold pb-2 text-3xl capitalize'>
+                                    {data?.user?.firstname} {data?.user?.lastname}
+                                </h2>
+                                <p className='text-md text-gray-700'>Correo electrónico: {data?.user?.email}</p>
+                                <p className='text-md text-gray-700'>
+                                    Fecha de nacimiento: {data?.user?.birthdate ? new Date(data.user.birthdate).toLocaleDateString('es-ES', { timeZone: 'UTC' }) : 'No definida'}
+                                </p>
                             </div>
                             <a onClick={() => navigate('/edit-profile')} className='flex text-white tracking-wide font-medium bg-[#38ced6] hover:bg-[#2aa8b0] rounded-xl px-3 py-2 transition duration-300 active:scale-[0.98] cursor-pointer' >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -55,7 +87,7 @@ export const Profile = () => {
                         </article>
                     ) : (
                         <>
-                            {/* Descripción Section */}
+                            {/* Sección de descripción */}
                             <article className='bg-white p-6 relative'>
                                 <div className='flex justify-between items-center mb-4'>
                                     <h2 className='font-bold text-xl text-gray-900'>Descripción</h2>
@@ -66,14 +98,14 @@ export const Profile = () => {
                                     </button>
                                 </div>
                                 <p className='text-gray-500 text-sm leading-relaxed'>
-                                    Desarrollador web con experiencia en la creación de aplicaciones web modernas y responsivas. Especializado en el stack MERN (MongoDB, Express, React, Node.js) y apasionado por las interfaces de usuario limpias y funcionales. Busco constantemente nuevos desafíos para seguir creciendo como profesional.
+                                    {data?.user?.description || 'No se ha agregado una descripción'}
                                 </p>
                             </article>
                             <hr className='border-[#ced2d7] mx-6' />
 
 
 
-                            {/* Ubicación Section */}
+                            {/* Sección de ubicación */}
                             <article className='bg-white p-6 relative'>
                                 <div className='flex justify-between items-center mb-4'>
                                     <h2 className='font-bold text-xl text-gray-900'>Ubicación</h2>
@@ -88,12 +120,12 @@ export const Profile = () => {
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                                     </svg>
-                                    <span>Jujuy, Argentina</span>
+                                    <p className='text-gray-500 text-sm'>{data?.user?.location || 'No se ha agregado una ubicación'}</p>
                                 </div>
                             </article>
                             <hr className='border-[#ced2d7] mx-6' />
 
-                            {/* Educación Section */}
+                            {/* Sección de educación */}
                             <article className='bg-white p-6 relative'>
                                 <div className='flex justify-between items-center mb-6'>
                                     <h2 className='font-bold text-xl text-gray-900'>Educación</h2>
@@ -105,30 +137,12 @@ export const Profile = () => {
                                 </div>
 
                                 <div className='space-y-6'>
-                                    {/* Mock Education Item */}
                                     <div className='flex flex-col md:flex-row gap-4 justify-between items-start border-l-4 border-l-blue-100 pl-4 py-1'>
                                         <div>
                                             <h3 className='font-bold text-lg text-gray-800'>Ingeniería en Informática</h3>
                                             <p className='text-sm text-gray-500 mb-2'>Universidad Nacional de Jujuy | 2018 - 2024</p>
                                             <p className='text-gray-600 text-sm'>
-                                                Especialización en desarrollo de software y arquitecturas escalables.
-                                            </p>
-                                        </div>
-                                        <button className='flex items-center gap-2 text-sm font-medium text-[#38ced6] hover:text-[#2aa8b0] bg-cyan-50 hover:bg-cyan-100 px-3 py-1.5 rounded-lg transition-colors mt-2 md:mt-0'>
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                                            </svg>
-                                            Ver Título
-                                        </button>
-                                    </div>
-
-                                    {/* Mock Education Item 2 */}
-                                    <div className='flex flex-col md:flex-row gap-4 justify-between items-start border-l-4 border-l-purple-100 pl-4 py-1'>
-                                        <div>
-                                            <h3 className='font-bold text-lg text-gray-800'>Curso de Full Stack Web Development</h3>
-                                            <p className='text-sm text-gray-500 mb-2'>Coderhouse | 2023</p>
-                                            <p className='text-gray-600 text-sm'>
-                                                Desarrollo de aplicaciones web SPA con React y Node.js.
+                                                {data?.user?.education || 'No se ha agregado una educación'}
                                             </p>
                                         </div>
                                         <button className='flex items-center gap-2 text-sm font-medium text-[#38ced6] hover:text-[#2aa8b0] bg-cyan-50 hover:bg-cyan-100 px-3 py-1.5 rounded-lg transition-colors mt-2 md:mt-0'>
@@ -142,7 +156,7 @@ export const Profile = () => {
                             </article>
                             <hr className='border-[#ced2d7] mx-6' />
 
-                            {/* Mis Habilidades Section */}
+                            {/* Sección de Mis Habilidades */}
                             <article className='bg-white p-6 relative'>
                                 <div className='flex justify-between items-center mb-6'>
                                     <h2 className='font-bold text-xl text-gray-900'>Mis Habilidades</h2>
@@ -153,8 +167,8 @@ export const Profile = () => {
                                     </button>
                                 </div>
                                 <div className='flex flex-wrap gap-3'>
-                                    {/* Vector de colores para las habilidades */}
                                     {(() => {
+                                        // Array de colores para las habilidades
                                         const tagsColors = [
                                             "bg-blue-100 text-blue-800",
                                             "bg-green-100 text-green-800",
@@ -165,12 +179,18 @@ export const Profile = () => {
                                             "bg-pink-100 text-pink-800",
                                         ];
 
-                                        return ['React', 'Node.js', 'JavaScript', 'MongoDB', 'HTML5', 'CSS3', 'Tailwind CSS'].map((skill, index) => (
+                                        const userSkills = data?.user?.skills || [];
+
+                                        if (userSkills.length === 0) {
+                                            return <p className='text-gray-500 text-sm'>No se han agregado habilidades</p>;
+                                        }
+
+                                        return userSkills.map((skill, index) => (
                                             <span
-                                                key={skill}
+                                                key={index}
                                                 className={`px-4 py-1.5 rounded-full text-sm font-bold ${tagsColors[index % tagsColors.length]} transition-all cursor-default`}
                                             >
-                                                {skill}
+                                                {typeof skill === 'string' ? skill : skill.name}
                                             </span>
                                         ));
                                     })()}

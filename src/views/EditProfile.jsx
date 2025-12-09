@@ -1,19 +1,38 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router';
+import { useAuth } from "../hooks/useAuth";
 import ImageUploadModal from '../components/ImageUploadModal';
 
 export const EditProfile = () => {
     const navigate = useNavigate();
+    const { data } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [profileImage, setProfileImage] = useState("../../public/user-image.webp");
+
+    console.log(data);
 
     const [formData, setFormData] = useState({
         nombre: '',
         apellido: '',
         email: '',
+        birthdate: '',
+        image: '',
         password: '',
         confirmPassword: ''
     });
+
+    React.useEffect(() => {
+        if (data?.user) {
+            setFormData(prev => ({
+                ...prev,
+                nombre: data.user.firstname || '',
+                apellido: data.user.lastname || '',
+                email: data.user.email || '',
+                birthdate: data.user.birthdate ? data.user.birthdate.split('T')[0] : '',
+                image: data.user.image || ''
+            }));
+        }
+    }, [data]);
     const [errors, setErrors] = useState({});
 
     const handleSaveImage = (newImage) => {
@@ -161,13 +180,13 @@ export const EditProfile = () => {
 
                         {/* Fecha de Nacimiento */}
                         <div className='space-y-2'>
-                            <label htmlFor="dob" className='block text-sm font-semibold text-gray-600'>
+                            <label htmlFor="birthdate" className='block text-sm font-semibold text-gray-600'>
                                 Fecha de nacimiento
                             </label>
                             <input
                                 type="date"
-                                id="dob"
-                                value={formData.dob}
+                                id="birthdate"
+                                value={formData.birthdate}
                                 onChange={handleChange}
                                 className='w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all'
                             />
@@ -177,7 +196,7 @@ export const EditProfile = () => {
                             {/* Contraseña */}
                             <div className='space-y-2'>
                                 <label htmlFor="password" className='block text-sm font-semibold text-gray-600'>
-                                    Contraseña
+                                    Nueva contraseña
                                 </label>
                                 <input
                                     type="password"

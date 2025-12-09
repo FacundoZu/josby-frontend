@@ -102,9 +102,8 @@ const Header = () => {
 
           <div
             ref={menuRef}
-            className={`fixed inset-0 bg-[#f6fdfe] z-50 pt-16 overflow-auto ${
-              isMenuOpen ? "block" : "hidden"
-            }`}
+            className={`fixed inset-0 bg-[#f6fdfe] z-50 pt-16 overflow-auto ${isMenuOpen ? "block" : "hidden"
+              }`}
           >
             <button
               onClick={() => setIsMenuOpen(false)}
@@ -133,7 +132,7 @@ const Header = () => {
                 {isFreelancer ? (
                   <NavLink
                     onClick={() => setIsMenuOpen(false)}
-                    to="/" 
+                    to="/"
                     className="hover:text-hover-cyan transition-colors"
                   >
                     Mis pedidos
@@ -141,7 +140,7 @@ const Header = () => {
                 ) : (
                   <NavLink
                     onClick={() => setIsMenuOpen(false)}
-                    to="/service" 
+                    to="/service"
                     className="hover:text-hover-cyan transition-colors"
                   >
                     Ofrecer servicio
@@ -155,7 +154,7 @@ const Header = () => {
                   {isFreelancer ? (
                     <NavLink
                       onClick={() => setIsMenuOpen(false)}
-                      to="/chat" 
+                      to="/chat"
                       className="relative flex items-center gap-2 bg-white border border-gray-300 text-text-primary hover:bg-gray-100 px-4 py-2 rounded-md"
                     >
                       <MdInbox className="text-xl" /> Mensajes
@@ -242,7 +241,7 @@ const Header = () => {
           <nav className="hidden md:flex gap-4 items-center">
             {isFreelancer ? (
               <NavLink
-                to="/chat" 
+                to="/chat"
                 className=" relative p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-full transition-all"
               >
                 <MdInbox className="text-3xl" />
@@ -280,7 +279,7 @@ const Header = () => {
                   <ul className="py-1">
                     <li>
                       <NavLink
-                        to="/"
+                        to="/profile"
                         className="flex items-center gap-2 px-4 py-2 text-sm text-text-primary hover:bg-gray-100"
                         onClick={() => setIsDropdownOpen(false)}
                       >
