@@ -120,7 +120,7 @@ const ImageUploadModal = ({ isOpen, onClose, onSave, currentImage }) => {
                     {preview && preview !== DEFAULT_IMAGE && (
                         <button
                             type="button"
-                            className="mt-2 text-sm font-medium text-red-600 hover:text-red-700 hover:underline"
+                            className="cursor-pointer mt-2 text-sm font-medium text-red-600 hover:text-red-700 hover:underline"
                             onClick={handleRemoveImage}
                         >
                             Eliminar imagen
@@ -135,14 +135,14 @@ const ImageUploadModal = ({ isOpen, onClose, onSave, currentImage }) => {
                 <div className="flex justify-end gap-3 mt-8">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
+                        className="cursor-pointer px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
                     >
                         Cancelar
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={!preview}
-                        className="px-6 py-2 text-sm font-medium text-white bg-[#38ced6] hover:bg-[#2aa8b0] rounded-lg transition duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
+                        className="cursor-pointer px-6 py-2 text-sm font-medium text-white bg-[#38ced6] hover:bg-[#2aa8b0] rounded-lg transition duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
                     >
                         Guardar Imagen
                     </button>

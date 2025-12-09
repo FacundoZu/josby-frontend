@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useAuth } from '../hooks/useAuth' //obtiene los datos del usuario logueado
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { setAsFreelancer } from '../API/userApi';
+// import { useMutation, useQueryClient } from '@tanstack/react-query';
+// import { setAsFreelancer } from '../API/userApi';
 import BecomeFreelancerModal from '../components/BecomeFreelancerModal';
 
 export const Profile = () => {

@@ -93,7 +93,7 @@ export const EditProfile = () => {
     };
 
     return (
-        <main className='py-8 bg-[#f6ffff] min-h-screen'>
+        <main className='py-8 min-h-screen'>
             <ImageUploadModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
