@@ -174,8 +174,13 @@ const FormServices = () => {
             <form onSubmit={handleNext} className="space-y-5">
               
               {/* Título / Categoría (CON LOGO) */}
+              <label className="block text-[#667387] text-sm mb-2 font-medium" htmlFor="title">Título</label>
+              <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
+                <input type="text" id='title' placeholder='Ej: Desarrollador Web FullStack' className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af]" />
+              </div>
+
               <div>
-                <label className="block text-[#667387] text-sm mb-2 font-medium">Título / Categoría</label>
+                <label className="block text-[#667387] text-sm mb-2 font-medium">Categoría</label>
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
                   <select 
                     value={selectedCategory}
