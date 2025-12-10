@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { FaUser, FaLock, FaGoogle, FaEnvelope, FaCalendarAlt } from "react-icons/fa"; 
+import { FaUser, FaLock, FaGoogle, FaEnvelope, FaCalendarAlt } from "react-icons/fa";
 import logoJosby from "../../assets/imgs/josby-logo.png";
 
 const Register = () => {
@@ -21,7 +21,7 @@ const Register = () => {
     const { mutate } = useMutation({
         mutationFn: registerUser,
         onError: (error) => {
-            toast.error(error.message)
+            toast.error(error.error)
         },
         onSuccess: (data) => {
             toast.success(data)
@@ -36,10 +36,10 @@ const Register = () => {
     // Clases reutilizables (Idénticas al Login)
     const labelClasses = "block text-[#667387] text-sm mb-2";
     const inputContainerClasses = "flex items-center bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition";
-    
+
     // Base para inputs normales
     const inputClasses = "bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af]";
-    
+
     // Clases específicas para el input date (Mantiene estilo visual del Login)
     const dateInputClasses = `
         bg-transparent border-none outline-none w-full 
@@ -55,19 +55,19 @@ const Register = () => {
 
     return (
         <div className="min-h-[100dvh] bg-[#fefefe] flex flex-col items-center justify-center px-4 py-8 sm:p-6">
-            
+
             {/* LOGO SUPERIOR */}
             <div className="mt-4 mb-12 flex justify-center w-full">
-                <img 
-                    src={logoJosby} 
-                    alt="Logo Josby" 
-                    className="w-auto h-16 sm:h-20 object-contain" 
+                <img
+                    src={logoJosby}
+                    alt="Logo Josby"
+                    className="w-auto h-16 sm:h-20 object-contain"
                 />
             </div>
 
             {/* TARJETA DEL FORMULARIO */}
             <div className="bg-[#ffffff] p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl w-full max-w-md mx-auto">
-                
+
                 {/* CORRECCIÓN: Cambiado de text-[#5a6678] a text-[#011314] para igualar la referencia del Login */}
                 {/*<h2 className="text-xl font-bold text-left mb-6 text-[#011314]">Registrate</h2>*/}
 
@@ -121,7 +121,7 @@ const Register = () => {
                                 type="email"
                                 placeholder="ejemplo@correo.com"
                                 autoComplete="email"
-                                {...register("email", { 
+                                {...register("email", {
                                     required: "El correo es obligatorio",
                                     pattern: { value: /\S+@\S+\.\S+/, message: "Correo inválido" }
                                 })}
@@ -156,7 +156,7 @@ const Register = () => {
                                 type="date"
                                 autoComplete="bday"
                                 {...register("birthdate", { required: "Fecha requerida" })}
-                                className={dateInputClasses} 
+                                className={dateInputClasses}
                             />
                         </div>
                         {errors.birthdate && <p className={errorClasses}>{errors.birthdate.message}</p>}

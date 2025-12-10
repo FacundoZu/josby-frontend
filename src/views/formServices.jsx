@@ -117,9 +117,9 @@ const categoriesData = {
 };
 
 const FormServices = () => {
-  const [step, setStep] = useState(1); 
-  const [selectedCategory, setSelectedCategory] = useState(""); 
-  const [selectedLocation, setSelectedLocation] = useState(""); 
+  const [step, setStep] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -151,7 +151,7 @@ const FormServices = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[#fefefe] flex flex-col items-center justify-center px-4 py-8 sm:p-6 font-sans">
-      
+
       {/* --- HEADER ICON (Maletín) --- */}
       <div className="mt-4 mb-8 flex justify-center w-full">
         <div className="bg-[#38ced6] p-4 rounded-xl shadow-lg shadow-[#cffafe]/50 text-white text-3xl">
@@ -161,7 +161,7 @@ const FormServices = () => {
 
       {/* --- TARJETA PRINCIPAL --- */}
       <div className="bg-[#ffffff] p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl w-full max-w-xl mx-auto border border-gray-50">
-        
+
         {/* =======================================================
             PASO 1: ÚNETE A NUESTRA RED DE TALENTOS
            ======================================================= */}
@@ -172,7 +172,7 @@ const FormServices = () => {
             </h2>
 
             <form onSubmit={handleNext} className="space-y-5">
-              
+
               {/* Título / Categoría (CON LOGO) */}
               <label className="block text-[#667387] text-sm mb-2 font-medium" htmlFor="title">Título</label>
               <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
@@ -182,7 +182,7 @@ const FormServices = () => {
               <div>
                 <label className="block text-[#667387] text-sm mb-2 font-medium">Categoría</label>
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
-                  <select 
+                  <select
                     value={selectedCategory}
                     onChange={handleCategoryChange}
                     className="bg-transparent border-none outline-none w-full text-[#374151] cursor-pointer placeholder-[#9ca3af]"
@@ -203,14 +203,14 @@ const FormServices = () => {
               <div>
                 <label className="block text-[#667387] text-sm mb-2 font-medium">Ubicación</label>
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
-                  <select 
+                  <select
                     className="bg-transparent border-none outline-none w-full text-[#374151] cursor-pointer"
                     onChange={(e) => setSelectedLocation(e.target.value)}
                     defaultValue=""
                   >
                     <option value="" disabled>Selecciona una provincia</option>
                     {argentinaProvinces.map((prov) => (
-                        <option key={prov} value={prov}>{prov}</option>
+                      <option key={prov} value={prov}>{prov}</option>
                     ))}
                   </select>
                 </div>
@@ -220,9 +220,9 @@ const FormServices = () => {
               <div>
                 <label className="block text-[#667387] text-sm mb-2 font-medium">Descripción</label>
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
-                  <textarea 
+                  <textarea
                     rows="4"
-                    placeholder="Describe tu experiencia y lo que buscas..." 
+                    placeholder="Describe tu experiencia y lo que buscas..."
                     className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af] resize-none"
                   ></textarea>
                 </div>
@@ -233,7 +233,7 @@ const FormServices = () => {
                 <label className="block text-[#667387] text-sm mb-2 font-medium">
                   Habilidades {selectedCategory ? `para ${selectedCategory}` : ''}
                 </label>
-                
+
                 {selectedCategory ? (
                   <div className="space-y-2 pl-1 max-h-64 overflow-y-auto custom-scrollbar pr-2">
                     {/* ACCEDEMOS A .skills */}
@@ -243,15 +243,15 @@ const FormServices = () => {
                           <input type="checkbox" className="peer appearance-none w-5 h-5 border-2 border-[#e5e7eb] rounded-md checked:bg-[#38ced6] checked:border-[#38ced6] transition cursor-pointer" />
                           <FaRegCheckCircle className="absolute text-white text-xs opacity-0 peer-checked:opacity-100 pointer-events-none transition scale-75" />
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
-                           <span 
-                             className="w-2.5 h-2.5 rounded-full shadow-sm" 
-                             style={{ backgroundColor: skill.color }}
-                           ></span>
-                           <span className="text-[#374151] text-sm font-medium group-hover:text-[#000] transition">
-                             {skill.name}
-                           </span>
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shadow-sm"
+                            style={{ backgroundColor: skill.color }}
+                          ></span>
+                          <span className="text-[#374151] text-sm font-medium group-hover:text-[#000] transition">
+                            {skill.name}
+                          </span>
                         </div>
                       </label>
                     ))}
@@ -288,13 +288,13 @@ const FormServices = () => {
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              
+
               {/* Título del Servicio (Muestra Logo + Categoría en placeholder) */}
               <div>
                 <label className="block text-[#667387] text-sm mb-2 font-medium">Nombre del Servicio</label>
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder={`Ej: Servicio de ${selectedCategory ? categoriesData[selectedCategory].logo + ' ' + selectedCategory : 'Profesional'}`}
                     className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af]"
                   />
@@ -305,9 +305,9 @@ const FormServices = () => {
               <div>
                 <label className="block text-[#667387] text-sm mb-2 font-medium">Descripción</label>
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
-                  <textarea 
+                  <textarea
                     rows="3"
-                    placeholder="Describe tu servicio en detalle..." 
+                    placeholder="Describe tu servicio en detalle..."
                     className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af] resize-none"
                   ></textarea>
                 </div>
@@ -316,18 +316,18 @@ const FormServices = () => {
               {/* Características del Paquete */}
               <div>
                 <div className="flex justify-between items-end mb-2">
-                    <label className="block text-[#667387] text-sm font-medium">Características del Paquete</label>
-                    <span className="text-xs text-[#9ca3af] italic">Una por línea</span>
+                  <label className="block text-[#667387] text-sm font-medium">Características del Paquete</label>
+                  <span className="text-xs text-[#9ca3af] italic">Una por línea</span>
                 </div>
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
-                  <textarea 
+                  <textarea
                     rows="5"
-                    placeholder={"Ej:\n3 conceptos\nRevisiones ilimitadas\nArchivos fuente\nGuía de uso"} 
+                    placeholder={"Ej:\n3 conceptos\nRevisiones ilimitadas\nArchivos fuente\nGuía de uso"}
                     className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af] resize-none leading-relaxed"
                   ></textarea>
                 </div>
                 <p className="mt-2 text-xs text-[#9ca3af]">
-                   Estas opciones aparecerán con un tilde (✓) en la tarjeta de compra.
+                  Estas opciones aparecerán con un tilde (✓) en la tarjeta de compra.
                 </p>
               </div>
 
@@ -336,29 +336,29 @@ const FormServices = () => {
                 <label className="block text-[#667387] text-sm mb-2 font-medium">Tiempo de entrega</label>
                 <div className="flex gap-4">
                   <div className="flex-1 bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
-                    <input 
-                      type="number" 
-                      placeholder="Ej: 5" 
+                    <input
+                      type="number"
+                      placeholder="Ej: 5"
                       className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af]"
                     />
                   </div>
                   <div className="w-1/3 bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
-                     <select className="bg-transparent border-none outline-none w-full text-[#374151] cursor-pointer">
-                        <option value="dias">Días</option>
-                        <option value="semanas">Semanas</option>
-                     </select>
+                    <select className="bg-transparent border-none outline-none w-full text-[#374151] cursor-pointer">
+                      <option value="dias">Días</option>
+                      <option value="semanas">Semanas</option>
+                    </select>
                   </div>
                 </div>
               </div>
 
               {/* Precio */}
               <div>
-                <label className="block text-[#667387] text-sm mb-2 font-medium">Precio (USD)</label>
+                <label className="block text-[#667387] text-sm mb-2 font-medium">Precio (ARS)</label>
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition flex items-center">
                   <span className="text-[#9ca3af] mr-2 text-lg font-semibold">$</span>
-                  <input 
-                    type="number" 
-                    placeholder="100" 
+                  <input
+                    type="number"
+                    placeholder="100"
                     className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af] text-lg font-medium"
                   />
                 </div>
@@ -368,12 +368,12 @@ const FormServices = () => {
               <div>
                 <label className="block text-[#667387] text-sm mb-2 font-medium">Categoría Principal</label>
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 opacity-70 cursor-not-allowed">
-                  <input 
-                      type="text" 
-                      // Muestra el logo también aquí si hay categoría seleccionada
-                      value={selectedCategory ? `${categoriesData[selectedCategory].logo} ${selectedCategory}` : "General"} 
-                      disabled 
-                      className="bg-transparent border-none outline-none w-full text-[#374151] font-medium"
+                  <input
+                    type="text"
+                    // Muestra el logo también aquí si hay categoría seleccionada
+                    value={selectedCategory ? `${categoriesData[selectedCategory].logo} ${selectedCategory}` : "General"}
+                    disabled
+                    className="bg-transparent border-none outline-none w-full text-[#374151] font-medium"
                   />
                 </div>
               </div>
@@ -382,11 +382,11 @@ const FormServices = () => {
               <div>
                 <label className="block text-[#667387] text-sm mb-2 font-medium">Fotos de portada</label>
                 <div className="border-2 border-dashed border-[#d1d5db] rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 transition group">
-                   <div className="bg-gray-100 p-3 rounded-full mb-2 group-hover:bg-[#e0fbfc] transition">
-                      <FaBriefcase className="text-[#9ca3af] group-hover:text-[#38ced6]" />
-                   </div>
-                   <p className="text-[#6b7280] text-sm font-medium">Haz clic para subir imágenes</p>
-                   <p className="text-[#9ca3af] text-xs mt-1">PNG, JPG hasta 5MB</p>
+                  <div className="bg-gray-100 p-3 rounded-full mb-2 group-hover:bg-[#e0fbfc] transition">
+                    <FaBriefcase className="text-[#9ca3af] group-hover:text-[#38ced6]" />
+                  </div>
+                  <p className="text-[#6b7280] text-sm font-medium">Haz clic para subir imágenes</p>
+                  <p className="text-[#9ca3af] text-xs mt-1">PNG, JPG hasta 5MB</p>
                 </div>
               </div>
 

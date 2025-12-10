@@ -24,7 +24,7 @@ const BecomeFreelancerModal = ({ isOpen, onClose, onConfirm }) => {
                     </button>
                     <button
                         onClick={onConfirm}
-                        className="cursor-pointer px-6 py-2 text-sm font-medium text-white bg-[#38ced6] hover:bg-[#2aa8b0] rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        className="cursor-pointer px-6 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500"
                     >
                         Confirmar
                     </button>

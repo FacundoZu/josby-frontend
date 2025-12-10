@@ -1,9 +1,9 @@
 import { login } from "../../API/authApi";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { Link, useNavigate } from "react-router"; 
+import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
-import { FaUser, FaLock, FaGoogle } from "react-icons/fa"; 
+import { FaUser, FaLock, FaGoogle } from "react-icons/fa";
 import logoJosby from "../../assets/imgs/josby-logo.png";
 
 const Login = () => {
@@ -18,10 +18,10 @@ const Login = () => {
     const { mutate } = useMutation({
         mutationFn: login,
         onError: (error) => {
-            toast.error(error.message);
+            toast.error("Error al iniciar sesión");
         },
         onSuccess: (data) => {
-            toast.success(data);
+            toast.success("Inicio de sesión exitoso");
             navigate('/');
         }
     });
@@ -30,20 +30,20 @@ const Login = () => {
 
     return (
         <div className="min-h-[100dvh] bg-[#fefefe] flex flex-col items-center justify-center px-4 py-8 sm:p-6">
-            
+
             {/* LOGO SUPERIOR: Sincronizado con Register */}
             {/* mt-4 (aire arriba) | mb-12 (separación de la tarjeta) */}
             <div className="mt-4 mb-12 flex justify-center w-full">
-                <img 
-                    src={logoJosby} 
-                    alt="Logo Josby" 
-                    className="w-auto h-16 sm:h-20 object-contain" 
+                <img
+                    src={logoJosby}
+                    alt="Logo Josby"
+                    className="w-auto h-16 sm:h-20 object-contain"
                 />
             </div>
 
             {/* TARJETA DEL FORMULARIO */}
             <div className="bg-[#ffffff] p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl w-full max-w-md mx-auto">
-                
+
                 {/* Título opcional, descomentar si se desea: */}
                 {/* <h2 className="text-xl font-bold text-left mb-6 text-[#011314]">Bienvenido</h2> */}
 

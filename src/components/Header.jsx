@@ -132,7 +132,7 @@ const Header = () => {
                 {isFreelancer ? (
                   <NavLink
                     onClick={() => setIsMenuOpen(false)}
-                    to="/mis-pedidos" 
+                    to="/mis-pedidos"
                     className="hover:text-hover-cyan transition-colors"
                   >
                     Mis pedidos
@@ -230,11 +230,11 @@ const Header = () => {
             >
               Mis pedidos
             </NavLink>
-          ) : (
+          ) : data && data.user ? (
             <NavLink to="/service" className="hover:text-hover-cyan transition-colors">
               Ofrecer servicio
             </NavLink>
-          )}
+          ) : null}
         </nav>
 
         {data ? (
@@ -265,10 +265,19 @@ const Header = () => {
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
                 className="flex items-center px-4 py-2 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
               >
-                <FaUser className="text-primary text-xl" />
-                <p className="ms-2 rounded-md">
+
+                <p className="mr-2">
                   {data.user.firstname} {data.user.lastname}
                 </p>
+                {data.user.image ? (
+                  <img
+                    src={data.user.image}
+                    alt="Perfil"
+                    className="w-10 h-10 rounded-full"
+                  />
+                ) : (
+                  <FaUser className="text-primary text-xl" />
+                )}
               </button>
 
               {isDropdownOpen && (
