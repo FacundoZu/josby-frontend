@@ -1,125 +1,27 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FaBriefcase, FaRegCheckCircle } from 'react-icons/fa';
-
-// Lista de Provincias de Argentina (Sin "Remoto" ni grupos, como pediste)
-const argentinaProvinces = [
-  "Buenos Aires",
-  "Catamarca",
-  "Chaco",
-  "Chubut",
-  "Ciudad Autónoma de Buenos Aires (CABA)",
-  "Córdoba",
-  "Corrientes",
-  "Entre Ríos",
-  "Formosa",
-  "Jujuy",
-  "La Pampa",
-  "La Rioja",
-  "Mendoza",
-  "Misiones",
-  "Neuquén",
-  "Río Negro",
-  "Salta",
-  "San Juan",
-  "San Luis",
-  "Santa Cruz",
-  "Santa Fe",
-  "Santiago del Estero",
-  "Tierra del Fuego",
-  "Tucumán"
-];
-
-// Base de datos REESTRUCTURADA con Logos y Habilidades
-const categoriesData = {
-  "Tecnología & Programación ": {
-    logo: '💻',
-    skills: [
-      { name: 'JavaScript', color: '#F7DF1E' },
-      { name: 'Python', color: '#3776AB' },
-      { name: 'HTML & CSS', color: '#E34F26' },
-      { name: 'Node.js', color: '#68A063' },
-      { name: 'React', color: '#61DAFB' },
-    ]
-  },
-  "Diseño & Creatividad": {
-    logo: '🎨',
-    skills: [
-      { name: 'Figma', color: '#A259FF' },
-      { name: 'Adobe Photoshop', color: '#31A8FF' },
-      { name: 'Adobe Illustrator', color: '#FF9A00' },
-      { name: 'Diseño UX/UI', color: '#FF6F61' },
-    ]
-  },
-  "Marketing & Publicidad": {
-    logo: '📢',
-    skills: [
-      { name: 'SEO', color: '#34A853' },
-      { name: 'Google Ads', color: '#4285F4' },
-      { name: 'Redes Sociales', color: '#E1306C' },
-    ]
-  },
-  "Escritura & Traducción": {
-    logo: '✍',
-    skills: [
-      { name: 'Copywriting', color: '#FFB300' },
-      { name: 'Corrección de textos', color: '#795548' },
-      { name: 'Traducción Español-Inglés', color: '#3F51B5' },
-    ]
-  },
-  "Administración & Finanzas": {
-    logo: '📂',
-    skills: [
-      { name: 'Excel', color: '#217346' },
-      { name: 'Gestión de proyectos', color: '#009688' },
-      { name: 'Contabilidad básica', color: '#8E24AA' },
-    ]
-  },
-  "Asistencia Virtual": {
-    logo: '🤖',
-    skills: [
-      { name: 'Atención al cliente', color: '#03A9F4' },
-      { name: 'Data Entry', color: '#607D8B' },
-      { name: 'Organización de agendas', color: '#4CAF50' },
-    ]
-  },
-  "Audio & Música": {
-    logo: '🎵',
-    skills: [
-      { name: 'Edición de audio', color: '#9C27B0' },
-      { name: 'Producción musical', color: '#7B1FA2' },
-      { name: 'Locución', color: '#D81B60' },
-    ]
-  },
-  "Video & Animación": {
-    logo: '🎬',
-    skills: [
-      { name: 'Edición de video', color: '#F44336' },
-      { name: 'After Effects', color: '#9999FF' },
-      { name: 'Animación 2D', color: '#FF7043' },
-    ]
-  },
-  "Soporte Técnico & Mantenimiento": {
-    logo: '🛠',
-    skills: [
-      { name: 'Hardware & Reparaciones', color: '#455A64' },
-      { name: 'Soporte IT', color: '#1E88E5' },
-      { name: 'Administración de sistemas', color: '#6D4C41' },
-    ]
-  },
-  "Emprendimiento & Consultorías": {
-    logo: '📈',
-    skills: [
-      { name: 'Mentoría', color: '#00897B' },
-      { name: 'Estrategia de negocio', color: '#5E35B1' },
-      { name: 'Planificación empresarial', color: '#FDD835' },
-    ]
-  }
-};
+import { argentinaProvinces } from '../constants/argentineProvinces';
+import { getCategories, getSkills, sendServiceForm } from '../API/service/serviceApi';
+import { useEffect } from 'react';
+import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router'
 
 const FormServices = () => {
   const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
+
+  const [title, setTitle] = useState("")
+  const [userDescription, setUserDescription] = useState("")
+  const [skills, setSkills] = useState([])
+  const [serviceName, setServiceName] = useState("")
+  const [description, setDescription] = useState("")
+  const [packageFeatures, setPackageFeatures] = useState("")
+  const [deliveryTime, setDeliveryTime] = useState("")
+  const [price, setPrice] = useState("");
+  const [categories, setCategories] = useState([])
+  const [selectedSkills, setSelectedSkills] = useState([])
+  const [images, setImages] = useState([])
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -127,10 +29,10 @@ const FormServices = () => {
 
   const handleNext = (e) => {
     e.preventDefault();
-    if (!selectedCategory) {
-      alert("Por favor selecciona un título/categoría para continuar.");
-      return;
-    }
+    // if (!selectedCategory) {
+    //   alert("Por favor selecciona un título/categoría para continuar.");
+    //   return;
+    // }
     setStep(2);
     scrollToTop();
   };
@@ -140,14 +42,70 @@ const FormServices = () => {
     scrollToTop();
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Formulario enviado final. Categoría:", selectedCategory, "Ubicación:", selectedLocation);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [catRes, skillsRes] = await Promise.all([
+          getCategories(),
+          getSkills()
+        ])
 
-  const handleCategoryChange = (e) => {
-    setSelectedCategory(e.target.value);
-  };
+        setCategories(catRes)
+        setSkills(skillsRes)
+      } catch (error) {
+        console.error("Error cargando datos:", error.message)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  const toggleSkill = (id) => {
+    setSelectedSkills((prev) =>
+      prev.includes(id)
+        ? prev.filter((skillId) => skillId !== id)
+        : [...prev, id]
+    )
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData()
+
+    formData.append("title", title)
+    formData.append("categories", selectedCategory)
+    formData.append("location", selectedLocation)
+    formData.append("userDescription", userDescription)
+    formData.append("serviceName", serviceName)
+    formData.append("description", description)
+    formData.append("deliveryTime", deliveryTime)
+    formData.append("price", price)
+    formData.append("features", packageFeatures)
+
+    selectedSkills.forEach((id, i) => {
+      formData.append(`skills[${i}]`, id)
+    })
+
+    // packageFeatures.split("\n").forEach((f, i) => {
+    //   formData.append(`features[${i}]`, f);
+    // })
+
+    for (let i = 0; i < images.length; i++) {
+      formData.append("images", images[i])
+    }
+
+    try {
+      await sendServiceForm(formData)
+
+      window.location.href = "/"
+
+    } catch (error) {
+      console.log(error)
+      toast.error(error.response?.data?.error || "Error al subir el servicio")
+
+    }
+  }
 
   return (
     <div className="min-h-[100dvh] bg-[#fefefe] flex flex-col items-center justify-center px-4 py-8 sm:p-6 font-sans">
@@ -176,27 +134,13 @@ const FormServices = () => {
               {/* Título / Categoría (CON LOGO) */}
               <label className="block text-[#667387] text-sm mb-2 font-medium" htmlFor="title">Título</label>
               <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
-                <input type="text" id='title' placeholder='Ej: Desarrollador Web FullStack' className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af]" />
-              </div>
-
-              <div>
-                <label className="block text-[#667387] text-sm mb-2 font-medium">Categoría</label>
-                <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
-                  <select
-                    value={selectedCategory}
-                    onChange={handleCategoryChange}
-                    className="bg-transparent border-none outline-none w-full text-[#374151] cursor-pointer placeholder-[#9ca3af]"
-                    required
-                  >
-                    <option value="" disabled>Selecciona tu especialidad</option>
-                    {/* Iteramos sobre las llaves y mostramos el logo + nombre */}
-                    {Object.keys(categoriesData).map((categoryName) => (
-                      <option key={categoryName} value={categoryName}>
-                        {categoriesData[categoryName].logo} {categoryName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <input 
+                  type="text" 
+                  id='title' 
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder='Ej: Desarrollador Web FullStack' 
+                  className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af]" />
               </div>
 
               {/* Ubicación (Provincias Argentinas) */}
@@ -222,6 +166,8 @@ const FormServices = () => {
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
                   <textarea
                     rows="4"
+                    value={userDescription}
+                    onChange={(e) => setUserDescription(e.target.value)}
                     placeholder="Describe tu experiencia y lo que buscas..."
                     className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af] resize-none"
                   ></textarea>
@@ -231,16 +177,46 @@ const FormServices = () => {
               {/* Habilidades (Adaptado a nueva estructura .skills) */}
               <div>
                 <label className="block text-[#667387] text-sm mb-2 font-medium">
-                  Habilidades {selectedCategory ? `para ${selectedCategory}` : ''}
+                  Habilidades
                 </label>
 
-                {selectedCategory ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {skills.map((skill) => (
+                    <label key={skill._id} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedSkills.includes(skill._id)}
+                        onChange={() => toggleSkill(skill._id)}
+                        className="peer appearance-none w-5 h-5 border-2 border-[#e5e7eb] rounded-md checked:bg-[#38ced6] checked:border-[#38ced6] transition cursor-pointer" />
+                        <FaRegCheckCircle className="absolute text-white text-md text-center opacity-0 peer-checked:opacity-100 pointer-events-none transition scale-75" />
+                      {skill.name}
+                    </label>
+                  ))}
+                </div>
+
+                {/* {skills.map((skill) => (
+                  <label key={skill._id} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      value={skill._id}
+                      checked={selectedSkills.includes(skill._id)}
+                      onChange={() => toggleSkill(skill._id)}
+                    />
+                    <span>{skill.name}</span>
+                  </label>
+                ))} */}
+
+                {/* {selectedCategory ? (
                   <div className="space-y-2 pl-1 max-h-64 overflow-y-auto custom-scrollbar pr-2">
-                    {/* ACCEDEMOS A .skills */}
+                    {/* ACCEDEMOS A .skills *
                     {categoriesData[selectedCategory].skills.map((skill) => (
                       <label key={skill.name} className="flex items-center space-x-3 cursor-pointer group hover:bg-gray-50 p-1.5 rounded-md transition">
                         <div className="relative flex items-center justify-center w-5 h-5">
-                          <input type="checkbox" className="peer appearance-none w-5 h-5 border-2 border-[#e5e7eb] rounded-md checked:bg-[#38ced6] checked:border-[#38ced6] transition cursor-pointer" />
+                          <input 
+                            type="checkbox"
+                            onChange={() => toggleSkill(skill.name)} 
+                            checked={skills.includes(skill.name)}
+                            className="peer appearance-none w-5 h-5 border-2 border-[#e5e7eb] rounded-md checked:bg-[#38ced6] checked:border-[#38ced6] transition cursor-pointer" />
                           <FaRegCheckCircle className="absolute text-white text-xs opacity-0 peer-checked:opacity-100 pointer-events-none transition scale-75" />
                         </div>
 
@@ -259,10 +235,10 @@ const FormServices = () => {
                 ) : (
                   <div className="text-center p-6 bg-gray-50 rounded-lg border border-dashed border-gray-200">
                     <p className="text-gray-400 text-sm italic">
-                      Selecciona un "Título" arriba para cargar las habilidades disponibles.
+                      Selecciona una "Categoría" arriba para cargar las habilidades disponibles.
                     </p>
                   </div>
-                )}
+                )} */}
               </div>
 
               {/* Botón Siguiente */}
@@ -295,9 +271,31 @@ const FormServices = () => {
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
                   <input
                     type="text"
-                    placeholder={`Ej: Servicio de ${selectedCategory ? categoriesData[selectedCategory].logo + ' ' + selectedCategory : 'Profesional'}`}
+                    value={serviceName}
+                    onChange={(e) => setServiceName(e.target.value)}
+                    placeholder={`Ej: Servicio de ${categories ? categories[0].logo + ' ' + categories[0].name : 'profesional'}`}
                     className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af]"
                   />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[#667387] text-sm mb-2 font-medium">Categoría</label>
+                <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="bg-transparent border-none outline-none w-full text-[#374151] cursor-pointer placeholder-[#9ca3af]"
+                    required
+                  >
+                    <option value="" disabled>Selecciona tu especialidad</option>
+                    {/* Iteramos sobre las llaves y mostramos el logo + nombre */}
+                    {categories && categories.map((category) => (
+                      <option key={category._id} value={category._id}>
+                        {category.logo} {category.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -307,6 +305,8 @@ const FormServices = () => {
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
                   <textarea
                     rows="3"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                     placeholder="Describe tu servicio en detalle..."
                     className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af] resize-none"
                   ></textarea>
@@ -322,6 +322,8 @@ const FormServices = () => {
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
                   <textarea
                     rows="5"
+                    value={packageFeatures}
+                    onChange={(e) => setPackageFeatures(e.target.value)}
                     placeholder={"Ej:\n3 conceptos\nRevisiones ilimitadas\nArchivos fuente\nGuía de uso"}
                     className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af] resize-none leading-relaxed"
                   ></textarea>
@@ -333,20 +335,16 @@ const FormServices = () => {
 
               {/* Tiempo de entrega */}
               <div>
-                <label className="block text-[#667387] text-sm mb-2 font-medium">Tiempo de entrega</label>
+                <label className="block text-[#667387] text-sm mb-2 font-medium">Tiempo de entrega (Días)</label>
                 <div className="flex gap-4">
                   <div className="flex-1 bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
                     <input
                       type="number"
+                      value={deliveryTime}
+                      onChange={(e) => setDeliveryTime(e.target.value)}
                       placeholder="Ej: 5"
                       className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af]"
                     />
-                  </div>
-                  <div className="w-1/3 bg-[#f7f7f9] rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-[#38ced6] transition">
-                    <select className="bg-transparent border-none outline-none w-full text-[#374151] cursor-pointer">
-                      <option value="dias">Días</option>
-                      <option value="semanas">Semanas</option>
-                    </select>
                   </div>
                 </div>
               </div>
@@ -358,6 +356,8 @@ const FormServices = () => {
                   <span className="text-[#9ca3af] mr-2 text-lg font-semibold">$</span>
                   <input
                     type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
                     placeholder="100"
                     className="bg-transparent border-none outline-none w-full text-[#374151] placeholder-[#9ca3af] text-lg font-medium"
                   />
@@ -365,7 +365,7 @@ const FormServices = () => {
               </div>
 
               {/* Categoría (Mostrar la seleccionada en el paso anterior) */}
-              <div>
+              {/* <div>
                 <label className="block text-[#667387] text-sm mb-2 font-medium">Categoría Principal</label>
                 <div className="bg-[#f7f7f9] rounded-lg px-4 py-3 opacity-70 cursor-not-allowed">
                   <input
@@ -376,18 +376,63 @@ const FormServices = () => {
                     className="bg-transparent border-none outline-none w-full text-[#374151] font-medium"
                   />
                 </div>
-              </div>
+              </div> */}
 
               {/* Fotos */}
               <div>
-                <label className="block text-[#667387] text-sm mb-2 font-medium">Fotos de portada</label>
-                <div className="border-2 border-dashed border-[#d1d5db] rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 transition group">
+                <label className="block text-[#667387] text-sm mb-2 font-medium">
+                  Fotos de portada
+                </label>
+
+                {/* Zona clickeable para subir imágenes */}
+                <label
+                  htmlFor="images"
+                  className="border-2 border-dashed border-[#d1d5db] rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 transition group"
+                >
                   <div className="bg-gray-100 p-3 rounded-full mb-2 group-hover:bg-[#e0fbfc] transition">
                     <FaBriefcase className="text-[#9ca3af] group-hover:text-[#38ced6]" />
                   </div>
-                  <p className="text-[#6b7280] text-sm font-medium">Haz clic para subir imágenes</p>
+                  <p className="text-[#6b7280] text-sm font-medium">
+                    Haz clic para subir imágenes
+                  </p>
                   <p className="text-[#9ca3af] text-xs mt-1">PNG, JPG hasta 5MB</p>
-                </div>
+                </label>
+
+                <input
+                  id="images"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    setImages((prev) => [...prev, ...files]);
+                  }}
+                />
+
+                {images.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {images.map((img, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={URL.createObjectURL(img)}
+                          alt="preview"
+                          className="w-full h-32 object-cover rounded-lg shadow"
+                        />
+
+                        {/* Botón eliminar */}
+                        <button
+                          onClick={() =>
+                            setImages((prev) => prev.filter((_, i) => i !== index))
+                          }
+                          className="cursor-pointer absolute top-1 right-1 bg-black bg-opacity-60 text-white rounded-full p-1 text-xs opacity-0 group-hover:opacity-100 transition"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Botonera */}
