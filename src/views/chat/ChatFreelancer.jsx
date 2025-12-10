@@ -24,7 +24,7 @@ const ChatFreelancer = () => {
   const [activeChat, setActiveChat] = useState(null)
   const [selectedChatId, setSelectedChatId] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
-
+  
 
   const chatContainerRef = useRef(null)
 
@@ -201,7 +201,13 @@ const ChatFreelancer = () => {
                 className={`p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-50 ${selectedChatId === chat._id ? 'bg-blue-50/50 border-l-4 border-l-primary' : 'border-l-4 border-l-transparent'}`}
               >
                 <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold shrink-0">
-                  {chat.clientId.firstname.charAt(0).toUpperCase()}{chat.clientId.lastname.charAt(0).toUpperCase()}
+                  {chat.clientId.image ? (
+                    <img src={chat.clientId.image} alt={chat.clientId.firstname} className="w-10 h-10 rounded-full  flex items-center justify-center" />
+                  ) : (
+                    <div>
+                      {chat.clientId.firstname.charAt(0).toUpperCase()}{chat.clientId.lastname.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0 relative">
                   <div className="flex justify-between items-baseline mb-1">
@@ -237,7 +243,13 @@ const ChatFreelancer = () => {
                    <MdKeyboardArrowLeft />
                  </button>
                  <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
-                    {activeChat.clientId.firstname.charAt(0).toUpperCase()}{activeChat.clientId.lastname.charAt(0).toUpperCase()}
+                  {activeChat.clientId.image ? (
+                    <img src={activeChat.clientId.image} alt={activeChat.clientId.firstname} className="w-10 h-10 rounded-full  flex items-center justify-center" />
+                  ) : (
+                    <div>
+                      {activeChat.clientId.firstname.charAt(0).toUpperCase()}{activeChat.clientId.lastname.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   </div>
                   <div>
                     <h3 className="font-bold text-text-primary">{activeChat.clientId.firstname} {activeChat.clientId.lastname}</h3>

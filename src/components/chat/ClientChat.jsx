@@ -159,7 +159,13 @@ const ClientChat = ({ freelancer }) => {
           <div className="p-4 bg-white border-b border-gray-100 flex items-center justify-between shadow-sm z-10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm">
-                {freelancer.firstname.charAt(0)}{freelancer.lastname.charAt(0)}
+                {freelancer.image ? (
+                  <img src={freelancer.image} alt={freelancer.firstname} className="w-10 h-10 rounded-full  flex items-center justify-center" />
+                ) : (
+                  <div>
+                    {freelancer.firstname.charAt(0)}{freelancer.lastname.charAt(0)}
+                  </div>
+                )}
               </div>
               <div>
                 <h4 className="font-bold text-text-primary text-sm">{freelancer.firstname} {freelancer.lastname}</h4>

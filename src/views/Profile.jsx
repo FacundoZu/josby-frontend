@@ -18,6 +18,7 @@ export const Profile = () => {
 
     const user = data?.user;
     const services = data?.services || [];
+    console.log(services)
     const isFreelancer = user?.role === 'freelancer';
 
     const handleConfirmFreelancer = () => {
@@ -108,7 +109,7 @@ export const Profile = () => {
                     {isFreelancer && services.length > 0 && (
                         <article className='bg-white p-6'>
                             <h2 className='font-bold text-xl pb-4 text-gray-800'>Mis Servicios</h2>
-                            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6'>
+                            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6'>
                                 {services.map((service) => (
                                     <ServiceCard key={service._id} service={service} />
                                 ))}

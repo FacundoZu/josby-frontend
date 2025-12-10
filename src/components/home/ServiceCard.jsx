@@ -12,6 +12,8 @@ const ServiceCard = ({ service }) => {
     ? `${service.usuarioId.firstname || ""} ${service.usuarioId.lastname || ""}`.trim()
     : "Usuario";
 
+  const userAvatar = service.usuarioId.image
+
   const location = service.usuarioId?.location || "Sin ubicación";
   const categoryName = service.categories?.[0]?.name || "Sin categoría";
   const firstImage = service.images?.[0] || null;
@@ -43,7 +45,13 @@ const ServiceCard = ({ service }) => {
 
         <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-100">
           <div className="w-8 h-8 rounded-full bg-primary-dark text-white flex items-center justify-center font-semibold text-sm">
-            {userName.charAt(0).toUpperCase()}
+            {userAvatar ? (
+              <img src={userAvatar} alt={userName} className="w-8 h-8 rounded-full flex items-center justify-center" />
+            ) : (
+              <div>
+                {userName.charAt(0).toUpperCase()}
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-text-primary truncate">
