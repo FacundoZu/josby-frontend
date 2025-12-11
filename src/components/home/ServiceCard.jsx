@@ -1,12 +1,13 @@
 import { GrLocation } from "react-icons/gr";
 import { Link } from "react-router";
 
+export const truncateDescription = (text, maxLength = 120) => {
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength).trim() + "...";
+}; 
+
 const ServiceCard = ({ service }) => {
-  const truncateDescription = (text, maxLength = 120) => {
-    if (!text) return "";
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength).trim() + "...";
-  };
 
   const userName = service.usuarioId
     ? `${service.usuarioId.firstname || ""} ${service.usuarioId.lastname || ""}`.trim()

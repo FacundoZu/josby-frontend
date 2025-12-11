@@ -1,4 +1,5 @@
 import { GrLocation } from "react-icons/gr";
+import { truncateDescription } from "../home/ServiceCard";
 
 export default function FreelancerCard({ data }) {
     return (
@@ -28,7 +29,7 @@ export default function FreelancerCard({ data }) {
             </div>
 
             <p className="text-gray-600 font-semibold my-2">{data.title}</p>
-            <p className="text-gray-600 text-sm">{data.description}</p>
+            <p className="text-gray-600 text-sm">{truncateDescription(data.description)}</p>
 
             <div className="flex flex-wrap gap-2 mt-3">
                 {data.skills.map((skill, index) => (
