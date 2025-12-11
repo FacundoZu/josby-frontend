@@ -107,7 +107,7 @@ const Services = forwardRef(({ filters, onPageChange }, ref) => {
                             <button
                                 onClick={() => onPageChange(filters.page - 1)}
                                 disabled={filters.page === 1}
-                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition-colors"
+                                className="cursor-pointer px-4 py-2 bg-gray-200 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition-colors"
                             >
                                 Anterior
                             </button>
@@ -119,7 +119,7 @@ const Services = forwardRef(({ filters, onPageChange }, ref) => {
                             <button
                                 onClick={() => onPageChange(filters.page + 1)}
                                 disabled={!pagination.hasMore}
-                                className="px-4 py-2 bg-primary-dark text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-dark/90 transition-colors"
+                                className="cursor-pointer px-4 py-2 bg-primary-dark text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-dark/90 transition-colors"
                             >
                                 Siguiente
                             </button>

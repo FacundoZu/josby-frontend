@@ -73,11 +73,11 @@ const FormServices = () => {
 
     const formData = new FormData()
 
-    formData.append("title", title)
+    formData.append("userTitle", title)
     formData.append("categories", selectedCategory)
     formData.append("location", selectedLocation)
     formData.append("userDescription", userDescription)
-    formData.append("serviceName", serviceName)
+    formData.append("title", serviceName)
     formData.append("description", description)
     formData.append("deliveryTime", deliveryTime)
     formData.append("price", price)

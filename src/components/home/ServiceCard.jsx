@@ -17,7 +17,7 @@ const ServiceCard = ({ service }) => {
   const location = service.usuarioId?.location || "Sin ubicación";
   const categoryName = service.categories?.[0]?.name || "Sin categoría";
   const firstImage = service.images?.[0] || null;
-
+ 
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden max-w-sm">
       <div className="relative h-48 w-full overflow-hidden bg-gray-200">
